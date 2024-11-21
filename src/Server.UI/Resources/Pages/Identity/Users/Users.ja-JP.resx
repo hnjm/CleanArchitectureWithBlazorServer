@@ -163,7 +163,7 @@
   <data name="Reset password successfully." xml:space="preserve">
     <value>パスワードを正常にリセットしました</value>
   </data>
-  <data name="Search for user name" xml:space="preserve">
+  <data name="Search by user name" xml:space="preserve">
     <value>ユーザー名を検索してください</value>
   </data>
   <data name="Set Active" xml:space="preserve">
@@ -279,5 +279,41 @@
   </data>
   <data name="Click to change status to inactive." xml:space="preserve">
     <value>クリックするとステータスが非アクティブに変更されます。</value>
+  </data>
+  <data name="No permission to change status." xml:space="preserve">
+    <value>ステータスを変更する権限がありません。</value>
+  </data>
+  <data name="Send Reset Password Email" xml:space="preserve">
+    <value>パスワードリセットメールを送信</value>
+  </data>
+  <data name="No roles available for this tenant." xml:space="preserve">
+    <value>このテナントに使用できるロールはありません。</value>
+  </data>
+  <data name="Search by role name" xml:space="preserve">
+    <value>役割名で検索</value>
+  </data>
+  <data name="Superior" xml:space="preserve">
+    <value>スーペリア</value>
+  </data>
+  <data name="Tenant" xml:space="preserve">
+    <value>テナント</value>
+  </data>
+  <data name="Language" xml:space="preserve">
+    <value>言語</value>
+  </data>
+  <data name="Last Modified By" xml:space="preserve">
+    <value>最終更新者</value>
+  </data>
+  <data name="Last Modified" xml:space="preserve">
+    <value>最終更新者</value>
+  </data>
+  <data name="Created By" xml:space="preserve">
+    <value>作成者</value>
+  </data>
+  <data name="Created" xml:space="preserve">
+    <value>作成日時</value>
+  </data>
+  <data name="Time Zone" xml:space="preserve">
+    <value>タイムゾーン</value>
   </data>
 </root>

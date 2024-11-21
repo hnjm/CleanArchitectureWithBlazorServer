@@ -1,6 +1,4 @@
-﻿using CleanArchitecture.Blazor.Application.Features.Identity.DTOs;
-
-namespace CleanArchitecture.Blazor.Application.Common.Security;
+﻿namespace CleanArchitecture.Blazor.Application.Common.Security;
 
 public class UserProfile
 {
@@ -18,4 +16,16 @@ public class UserProfile
     public bool IsActive { get; set; }
     public string? TenantId { get; set; }
     public string? TenantName { get; set; }
+
+    public string? TimeZoneId { get; set; }
+    public string? LanguageCode { get; set; }
+    public TimeSpan LocalTimeOffset => string.IsNullOrEmpty(TimeZoneId)
+    ? TimeZoneInfo.Local.BaseUtcOffset
+    : TimeZoneInfo.FindSystemTimeZoneById(TimeZoneId).BaseUtcOffset;
+}
+
+[Mapper]
+public static partial class UserProfileMapper
+{
+    public static partial ChangeUserProfileModel ToChangeUserProfileModel(UserProfile entity);
 }

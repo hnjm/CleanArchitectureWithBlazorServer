@@ -1,16 +1,20 @@
-﻿namespace CleanArchitecture.Blazor.Application.Common.ExceptionHandlers;
+﻿using EntityFramework.Exceptions.Common;
 
-public class
-    DbExceptionHandler<TRequest, TResponse, TException> : IRequestExceptionHandler<TRequest, TResponse, TException>
+namespace CleanArchitecture.Blazor.Application.Common.ExceptionHandlers;
+
+public class DbExceptionHandler<TRequest, TResponse, TException> : IRequestExceptionHandler<TRequest, TResponse, TException>
     where TRequest : IRequest<Result<int>>
     where TResponse : Result<int>
     where TException : DbUpdateException
 {
-    private readonly ILogger<DbExceptionHandler<TRequest, TResponse, TException>> _logger;
+    private readonly ILogger _logger;
+    private readonly ILoggerFactory _loggerFactory;
 
-    public DbExceptionHandler(ILogger<DbExceptionHandler<TRequest, TResponse, TException>> logger)
+    public DbExceptionHandler(ILoggerFactory loggerFactory)
     {
-        _logger = logger;
+        
+        _loggerFactory = loggerFactory;
+        _logger = _loggerFactory.CreateLogger(nameof(DbExceptionHandler<TRequest, TResponse, TException>));
     }
 
     public Task Handle(TRequest request, TException exception, RequestExceptionHandlerState<TResponse> state,
@@ -20,38 +24,62 @@ public class
         return Task.CompletedTask;
     }
 
-    private static string[] GetErrors(DbUpdateException exception)
+    private  string[] GetErrors(DbUpdateException exception)
     {
-        IList<string> errors = new List<string>();
-        if (exception.InnerException != null
-            && exception.InnerException != null
-           )
-            //switch (sqlException.Number)
-            //{
-            //    case 2627: // Unique constraint error
-            //        errors.Add(
-            //            "A Unique Constraint Error Has Occured While Updating the record! Duplicate Record cannot be inserted in the System.");
-            //        break;
-            //    case 544
-            //        : // Cannot insert explicit value for identity column in table 'Departments' when IDENTITY_INSERT is set to OFF
-            //        errors.Add(
-            //            "Cannot insert explicit value for identity column in the system when the id is set to OFF");
-            //        break;
-            //    case 547: // Constraint check violation, Conflict in the database
-            //        errors.Add("A Constraint Check violation Error Has Occured While Updating the record(s)!");
-            //        break;
-            //    case 2601
-            //        : // Duplicated key row error // Constraint violation exception // A custom exception of yours for concurrency issues           
-            //        errors.Add("A Duplicate Key Error Has Occured While Updating the record(s)!");
-            //        break;
-            //    case 201: // Procedure missing parameters            
-            //        errors.Add("A Missing Parameter has led to Error  While Creating the record(s)!");
-            //        break;
-            //}
-            foreach (var result in exception.Entries)
-                errors.Add(
-                    $"A DbUpdateException was caught while saving changes. Type: {result.Entity.GetType().Name} was part of the problem. ");
 
-        return errors.ToArray();
+
+        return exception switch
+        {
+            UniqueConstraintException e => GetUniqueConstraintExceptionErrors(e),
+            CannotInsertNullException e => GetCannotInsertNullExceptionErrors(e),
+            MaxLengthExceededException e => GetMaxLengthExceededExceptionErrors(e),
+            NumericOverflowException e => GetNumericOverflowExceptionErrors(e),
+            ReferenceConstraintException e => GetReferenceConstraintExceptionErrors(e),
+            _ => new[] { exception.GetBaseException().Message }
+        };
     }
+    private  string[] GetUniqueConstraintExceptionErrors(UniqueConstraintException exception)
+    {
+        var tableName = string.IsNullOrWhiteSpace(exception.SchemaQualifiedTableName) ? "unknown table" : exception.SchemaQualifiedTableName;
+        var properties = exception.ConstraintProperties != null && exception.ConstraintProperties.Any()
+            ? string.Join(", ", exception.ConstraintProperties)
+            : "unknown properties";
+
+        return new[]
+        {
+            $"A unique constraint violation occurred on constraint in table '{tableName}'. " +
+            $"'{properties}'. Please ensure the values are unique."
+        };
+    }
+    private  string[] GetCannotInsertNullExceptionErrors(CannotInsertNullException exception)
+    {
+        return new[]
+        {
+            "Some required information is missing. Please make sure all required fields are filled out."
+        };
+    }
+    private  string[] GetMaxLengthExceededExceptionErrors(MaxLengthExceededException exception)
+    {
+        return new[]
+        {
+            "Some input is too long. Please shorten the data entered in the fields."
+        };
+    }
+    private  string[] GetNumericOverflowExceptionErrors(NumericOverflowException exception)
+    {
+        return new[]
+        {
+           "A number you entered is too large or too small. Please enter a number within the allowed range."
+        };
+    }
+    private  string[] GetReferenceConstraintExceptionErrors(ReferenceConstraintException exception)
+    {
+        var tableName = string.IsNullOrWhiteSpace(exception.SchemaQualifiedTableName) ? "unknown table" : exception.SchemaQualifiedTableName;
+        return new[]
+        {
+            $"The operation failed because this record is linked to other records in {tableName}. " +
+            $"Please remove any related records first"
+        };
+    }
+
 }

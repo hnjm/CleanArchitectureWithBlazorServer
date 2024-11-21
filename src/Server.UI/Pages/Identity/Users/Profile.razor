@@ -1,6 +1,6 @@
 ﻿@page "/user/profile"
 
-@using CleanArchitecture.Blazor.Server.UI.Services.Fusion
+@using CleanArchitecture.Blazor.Application.Features.Fusion
 @using ResizeMode = SixLabors.ImageSharp.Processing.ResizeMode
 @using Size = SixLabors.ImageSharp.Size
 @using SixLabors.ImageSharp.Processing
@@ -68,25 +68,31 @@ else
                         </div>
                     </MudItem>
                     <MudItem sm="6" xs="12">
-                        <MudTextField For="@(() => model.TenantName)" ShrinkLabel="true" @bind-Value="model.TenantName" Label="@L["Tenant Name"]" Variant="Variant.Text" ReadOnly="true"></MudTextField>
+                        <MudTextField For="@(() => model.TenantName)"  @bind-Value="model.TenantName" Label="@L["Tenant Name"]"  ReadOnly="true"></MudTextField>
                     </MudItem>
                     <MudItem xs="12" sm="6">
-                        <MudTextField For="@(() => model.SuperiorName)" ShrinkLabel="true" @bind-Value="model.SuperiorName" Label="@L["Superior Name"]" Variant="Variant.Text" ReadOnly="true"></MudTextField>
+                        <MudTextField For="@(() => model.SuperiorName)"  @bind-Value="model.SuperiorName" Label="@L["Superior Name"]"  ReadOnly="true"></MudTextField>
                     </MudItem>
                     <MudItem sm="6" xs="12">
-                        <MudTextField For="@(() => model.UserName)" ShrinkLabel="true" @bind-Value="model.UserName" Label="@L["User Name"]" Variant="Variant.Text" ReadOnly="true"></MudTextField>
+                        <MudTextField For="@(() => model.UserName)"  @bind-Value="model.UserName" Label="@L["User Name"]"  ReadOnly="true"></MudTextField>
                     </MudItem>
                     <MudItem sm="6" xs="12">
-                        <MudTextField For="@(() => model.Email)" ShrinkLabel="true" @bind-Value="model.Email" Label="@L["Email"]" Variant="Variant.Text" ReadOnly="true"></MudTextField>
+                        <MudTextField For="@(() => model.Email)"  @bind-Value="model.Email" Label="@L["Email"]"  ReadOnly="true"></MudTextField>
                     </MudItem>
                     <MudItem sm="6" xs="12">
-                        <MudTextField For="@(() => model.DisplayName)" ShrinkLabel="true" @bind-Value="model.DisplayName" Label="@L["Full Name"]" Variant="Variant.Text"></MudTextField>
+                        <MudTextField For="@(() => model.DisplayName)"  @bind-Value="model.DisplayName" Label="@L["Full Name"]" ></MudTextField>
                     </MudItem>
                     <MudItem sm="6" xs="12">
-                        <MudTextField For="@(() => model.PhoneNumber)" ShrinkLabel="true" @bind-Value="model.PhoneNumber" Label="@L["Phone Number"]" Variant="Variant.Text"></MudTextField>
+                        <MudTextField For="@(() => model.PhoneNumber)"  @bind-Value="model.PhoneNumber" Label="@L["Phone Number"]" ></MudTextField>
+                    </MudItem>
+                    <MudItem sm="6" xs="12">
+                        <TimeZoneAutocomplete T="string" For="@(() => model.TimeZoneId)"  @bind-Value="model.TimeZoneId" Label="@L["Time Zone"]" ></TimeZoneAutocomplete>
+                    </MudItem>
+                    <MudItem sm="6" xs="12">
+                        <LanguageAutocomplete T="string" For="@(() => model.LanguageCode)"  @bind-Value="model.LanguageCode" Label="@L["Language"]" ></LanguageAutocomplete>
                     </MudItem>
                     <MudItem sm="12" xs="12" Class="d-flex justify-end">
-                        <MudButton ButtonType="ButtonType.Button" Disabled="@_submitting" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto" OnClick="@(async () => await Submit())">
+                        <MudButton ButtonType="ButtonType.Button" Disabled="@_submitting"  Color="Color.Primary" Class="ml-auto" OnClick="@(async () => await Submit())">
                             @if (_submitting)
                             {
                                 <MudProgressCircular Class="ms-n1" Size="MudBlazor.Size.Small" Indeterminate="true" />
@@ -109,7 +115,7 @@ else
                                       Label="@L["Current Password"]"
                                           For="@(() => _changepassword.CurrentPassword)"
                                           @bind-Value="_changepassword.CurrentPassword"
-                                          Variant="Variant.Text"
+                                          
                                           Required="true" />
                     </MudItem>
                     <MudItem xs="12">
@@ -117,7 +123,7 @@ else
                                           Label="@L["New Password"]"
                                           For="@(() => _changepassword.NewPassword)"
                                           @bind-Value="_changepassword.NewPassword"
-                                          Variant="Variant.Text"
+                                          
                                           Required="true" />
                     </MudItem>
                     <MudItem xs="12">
@@ -125,11 +131,11 @@ else
                                           Label="@L["Confirm New Password"]"
                                           For="@(() => _changepassword.ConfirmPassword)"
                                           @bind-Value="_changepassword.ConfirmPassword"
-                                          Variant="Variant.Text"
+                                          
                                           Required="true" />
                     </MudItem>
                     <MudItem sm="12" xs="12" Class="d-flex justify-end">
-                        <MudButton ButtonType="ButtonType.Button" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto" OnClick="@(async () => await ChangePassword())">
+                        <MudButton ButtonType="ButtonType.Button"  Color="Color.Primary" Class="ml-auto" OnClick="@(async () => await ChangePassword())">
                             @if (_submitting)
                             {
                                 <MudProgressCircular Class="ms-n1" Size="MudBlazor.Size.Small" Indeterminate="true" />
@@ -156,9 +162,9 @@ else
 
 @code {
     [Inject] protected IServiceProvider Services { get; init; } = null!;
-    private string _currentUserName => UserProfileStateService.UserProfile.UserName;
-    private TimeSpan UpdateDelay { get; set; } = TimeSpan.FromSeconds(1);
-    private UserProfile? UserProfile => UserProfileStateService.UserProfile;
+    private string _currentUserName = string.Empty;
+
+    private UserProfile? UserProfile { get; set; }
     private UserManager<ApplicationUser> UserManager = null!;
     public string Title { get; set; } = "Profile";
     private MudForm? _form;
@@ -169,7 +175,7 @@ else
     public string Id => Guid.NewGuid().ToString();
     private ChangeUserProfileModel model = null!;
 
-
+    [CascadingParameter] private Task<AuthenticationState> AuthState { get; set; } = default!;
 
     private async void ActivePanelIndexChanged(int index)
     {
@@ -181,7 +187,7 @@ else
 
     private async Task LoadOrgData()
     {
-       
+
         var list = await UserManager.Users.Include(x => x.UserRoles).ThenInclude(x => x.Role).Include(x => x.Superior).ToListAsync();
 
         foreach (var item in list)
@@ -209,10 +215,13 @@ else
         await new OrgChart(JS).Create(_orgData);
     }
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         UserManager = Services.GetRequiredService<UserManager<ApplicationUser>>();
-        model = Mapper.Map<ChangeUserProfileModel>(UserProfile);
+        var state = await AuthState;
+        _currentUserName = state.User.Identity?.Name??string.Empty;
+        await UserProfileStateService.InitializeAsync(state.User.Identity?.Name??string.Empty);
+        model = UserProfileMapper.ToChangeUserProfileModel(UserProfileStateService.UserProfile);
     }
 
     protected override void Dispose(bool disposing)
@@ -235,12 +244,12 @@ else
                 var user = await UserManager.FindByNameAsync(model.UserName) ?? throw new NotFoundException($"The application user [{model.UserName}] was not found.");
                 image.Mutate(i => i.Resize(new ResizeOptions { Mode = ResizeMode.Crop, Size = new Size(128, 128) }));
                 image.Save(outStream, PngFormat.Instance);
-                var result = await UploadService.UploadAsync(new UploadRequest(user.Id + ".png", UploadType.ProfilePicture, outStream.ToArray(), true));
+                var result = await UploadService.UploadAsync(new UploadRequest($"{user.Id}_{DateTime.UtcNow.Ticks}.png", UploadType.ProfilePicture, outStream.ToArray(), true));
                 model.ProfilePictureDataUrl = result;
                 user.ProfilePictureDataUrl = model.ProfilePictureDataUrl;
                 await UserManager.UpdateAsync(user);
                 Snackbar.Add(L["The avatar has been updated"], Severity.Info);
-                UserProfileStateService.UpdateUserProfile(user.ProfilePictureDataUrl, user.DisplayName, user.PhoneNumber);
+                UserProfileStateService.UpdateUserProfile(user.UserName!,user.ProfilePictureDataUrl, user.DisplayName, user.PhoneNumber,user.TimeZoneId, user.LanguageCode);
                 await OnlineUserTracker.Update(user.Id,
                                                user.UserName??"",
                                                user.DisplayName ?? "",
@@ -261,9 +270,11 @@ else
                 var user = await UserManager.FindByNameAsync(_currentUserName) ?? throw new NotFoundException($"The application user [{_currentUserName}] was not found.");
                 user.PhoneNumber = model.PhoneNumber;
                 user.DisplayName = model.DisplayName;
+                user.TimeZoneId = model.TimeZoneId;
+                user.LanguageCode = model.LanguageCode;
                 user.ProfilePictureDataUrl = model.ProfilePictureDataUrl;
                 await UserManager.UpdateAsync(user);
-                UserProfileStateService.UpdateUserProfile(user.ProfilePictureDataUrl, user.DisplayName, user.PhoneNumber);
+                UserProfileStateService.UpdateUserProfile(user.UserName!,user.ProfilePictureDataUrl, user.DisplayName, user.PhoneNumber,user.TimeZoneId, user.LanguageCode);
                 await OnlineUserTracker.Update(user.Id,
                                                user.UserName ?? "",
                                                user.DisplayName ?? "",

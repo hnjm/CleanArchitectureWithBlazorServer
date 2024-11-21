@@ -1,5 +1,4 @@
 ﻿global using System.Data;
-global using AutoMapper.QueryableExtensions;
 global using CleanArchitecture.Blazor.Application.Common.Interfaces;
 global using CleanArchitecture.Blazor.Application.Common.Models;
 global using CleanArchitecture.Blazor.Infrastructure.Extensions;
@@ -9,4 +8,3 @@ global using FluentValidation;
 global using Microsoft.AspNetCore.Components;
 global using MudBlazor;
 global using Microsoft.EntityFrameworkCore;
-global using Severity = MudBlazor.Severity;

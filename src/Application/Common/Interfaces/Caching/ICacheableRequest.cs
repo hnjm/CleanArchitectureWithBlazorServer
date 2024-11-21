@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 namespace CleanArchitecture.Blazor.Application.Common.Interfaces.Caching;
@@ -6,5 +6,11 @@ namespace CleanArchitecture.Blazor.Application.Common.Interfaces.Caching;
 public interface ICacheableRequest<TResponse> : IRequest<TResponse>
 {
     string CacheKey => string.Empty;
-    MemoryCacheEntryOptions? Options { get; }
+    IEnumerable<string>? Tags { get; }
+}
+
+public interface IFusionCacheRequest<TResponse> : IRequest<TResponse>
+{
+    string CacheKey => string.Empty;
+    string CacheName => string.Empty;
 }

@@ -1,11 +1,8 @@
 ﻿using System.Net.Http.Headers;
-using System.Reflection;
 using BlazorDownloadFile;
-using CleanArchitecture.Blazor.Domain.Identity;
 using CleanArchitecture.Blazor.Infrastructure.Constants.Localization;
 using CleanArchitecture.Blazor.Server.UI.Hubs;
 using CleanArchitecture.Blazor.Server.UI.Services;
-using CleanArchitecture.Blazor.Server.UI.Services.Fusion;
 using CleanArchitecture.Blazor.Server.UI.Services.JsInterop;
 using CleanArchitecture.Blazor.Server.UI.Services.Layout;
 using CleanArchitecture.Blazor.Server.UI.Services.Navigation;
@@ -15,13 +12,11 @@ using Hangfire;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.Extensions.FileProviders;
 using MudBlazor.Services;
-using Polly;
 using QuestPDF;
 using QuestPDF.Infrastructure;
-using ActualLab.Fusion;
 using Toolbelt.Blazor.Extensions.DependencyInjection;
-using ActualLab.Fusion.Extensions;
 using CleanArchitecture.Blazor.Server.UI.Middlewares;
+using CleanArchitecture.Blazor.Application;
 
 
 namespace CleanArchitecture.Blazor.Server.UI;
@@ -46,6 +41,8 @@ public static class DependencyInjection
         services.AddMudServices(config =>
         {
             MudGlobal.InputDefaults.ShrinkLabel = true;
+            //MudGlobal.InputDefaults.Variant = Variant.Outlined;
+            //MudGlobal.ButtonDefaults.Variant = Variant.Outlined;
             config.SnackbarConfiguration.PositionClass = Defaults.Classes.Position.BottomCenter;
             config.SnackbarConfiguration.NewestOnTop = false;
             config.SnackbarConfiguration.ShowCloseIcon = true;
@@ -66,15 +63,6 @@ public static class DependencyInjection
         services.AddMudBlazorSnackbar();
         services.AddMudBlazorDialog();
         services.AddHotKeys2();
-
-        // Fusion services
-        services.AddFusion(fusion =>
-        {
-            fusion.AddInMemoryKeyValueStore();
-            fusion.AddService<IUserSessionTracker, UserSessionTracker>();
-            fusion.AddService<IOnlineUserTracker, OnlineUserTracker>();
-        });
-
 
         services.AddScoped<LocalizationCookiesMiddleware>()
             .Configure<RequestLocalizationOptions>(options =>
@@ -106,8 +94,8 @@ public static class DependencyInjection
         {
             c.BaseAddress = new Uri("http://10.33.1.150:8000/ocr/predict-by-file");
             c.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-        }).AddTransientHttpErrorPolicy(policy => policy.WaitAndRetryAsync(3, _ => TimeSpan.FromSeconds(30)));
-        services.AddScoped<LocalTimezoneOffset>();
+        });
+        services.AddScoped<LocalTimeOffset>();
         services.AddHttpContextAccessor();
         services.AddScoped<HubClient>();
         services
@@ -149,18 +137,20 @@ public static class DependencyInjection
             // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
             app.UseHsts();
         }
-
+        app.InitializeCacheFactory();
         app.UseStatusCodePagesWithRedirects("/404");
         app.MapHealthChecks("/health");
-
         app.UseAuthentication();
         app.UseAuthorization();
         app.UseAntiforgery();
         app.UseHttpsRedirection();
-        app.UseStaticFiles();
+        app.MapStaticAssets();
+        
 
         if (!Directory.Exists(Path.Combine(Directory.GetCurrentDirectory(), @"Files")))
             Directory.CreateDirectory(Path.Combine(Directory.GetCurrentDirectory(), @"Files"));
+
+
 
         app.UseStaticFiles(new StaticFileOptions
         {
@@ -193,6 +183,7 @@ public static class DependencyInjection
         { // We obviously need this
             KeepAliveInterval = TimeSpan.FromSeconds(30), // Just in case
         });
+       
         return app;
     }
 }

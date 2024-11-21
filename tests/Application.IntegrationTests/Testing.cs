@@ -1,8 +1,10 @@
-using System;
+﻿using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using CleanArchitecture.Blazor.Application.Common.Interfaces;
+using CleanArchitecture.Blazor.Application.Common.Interfaces.Identity;
+using CleanArchitecture.Blazor.Application.Common.Interfaces.MediatorWrapper;
 using CleanArchitecture.Blazor.Application.Common.Interfaces.MultiTenant;
 using CleanArchitecture.Blazor.Domain.Identity;
 using CleanArchitecture.Blazor.Infrastructure;
@@ -59,15 +61,14 @@ public class Testing
         // Replace service registration for ICurrentUserService
         // Remove existing registration
         var currentUserServiceDescriptor = services.FirstOrDefault(d =>
-            d.ServiceType == typeof(ICurrentUserService));
+            d.ServiceType == typeof(ICurrentUserAccessor));
 
         services.Remove(currentUserServiceDescriptor);
 
         // Register testing version
         services.AddScoped(provider =>
-            Mock.Of<ICurrentUserService>(s => s.UserId == _currentUserId));
-        services.AddScoped(provider =>
-            Mock.Of<ITenantProvider>(s => s.TenantId == _currentTenantId));
+            Mock.Of<ICurrentUserAccessor>(s => s.SessionInfo.UserId == _currentUserId));
+
 
         _scopeFactory = services.BuildServiceProvider().GetService<IServiceScopeFactory>();
 
@@ -93,7 +94,7 @@ public class Testing
     {
         using var scope = _scopeFactory.CreateScope();
 
-        var mediator = scope.ServiceProvider.GetService<IMediator>();
+        var mediator = scope.ServiceProvider.GetService<IScopedMediator>();
 
         return await mediator.Send(request);
     }

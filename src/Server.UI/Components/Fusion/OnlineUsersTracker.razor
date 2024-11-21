@@ -1,27 +1,29 @@
-﻿@using CleanArchitecture.Blazor.Server.UI.Services.Fusion
-@using ActualLab.Fusion
+﻿@using ActualLab.Fusion
 @using ActualLab.Fusion.Blazor
 @using ActualLab.Fusion.UI
+@using CleanArchitecture.Blazor.Application.Common.Interfaces.Identity
+@using CleanArchitecture.Blazor.Application.Features.Fusion
 
-@inherits ComputedStateComponent<UserInfo[]>
+
+@inherits ComputedStateComponent<List<SessionInfo>>
 @inject IOnlineUserTracker OnlineUserTracker
 @inject IStringLocalizer<ActiveUserSession> L
-@inject UserProfileStateService UserProfileStateService
+@inject ICurrentUserAccessor SessionInfoAccessor
 @if (State.HasValue && State.LastNonErrorValue.Any())
 {
     <div class="d-flex flex-row gap-2 my-3 gap-2 my-3">
-        @foreach (var user in State.LastNonErrorValue.OrderBy(u => u.Name != currentUserName))
+        @foreach (var user in State.LastNonErrorValue.OrderBy(u => u.UserId != currentUserId))
         {
-            <MudBadge Color="Color.Success" Overlap="true" Bordered="true">
+            <MudBadge Color="Color.Success" Overlap="false" Dot="true" Bordered="true">
                 @if (string.IsNullOrEmpty(user.ProfilePictureDataUrl))
                 {
-                    <MudAvatar title="@user.Name">
-                        @user.Name.First()
+                    <MudAvatar title="@user.UserName">
+                        @user.UserName.First()
                     </MudAvatar>
                 }
                 else
                 {
-                    <MudAvatar title="@user.Name">
+                    <MudAvatar title="@user.UserName">
                         <MudImage Src="@user.ProfilePictureDataUrl"></MudImage>
                     </MudAvatar>
                 }
@@ -29,7 +31,7 @@
         }
     </div>
 }
-@if(State.Error is not null)
+@if (State.Error is not null)
 {
     <MudAlert Severity="Severity.Error">@State.Error.Message</MudAlert>
 }
@@ -38,38 +40,32 @@
 @code {
 
     private string sessionId = Guid.NewGuid().ToString();
-    private string? currentUserName;
-    private UserProfile UserProfile => UserProfileStateService.UserProfile;
+    private string? currentUserId;
+    [CascadingParameter] private Task<AuthenticationState> AuthState { get; set; } = default!;
     [Inject] private UIActionTracker UIActionTracker { get; init; } = null!;
     private TimeSpan UpdateDelay { get; set; } = TimeSpan.FromSeconds(5);
     protected override async Task OnInitializedAsync()
     {
-        currentUserName = UserProfile.UserName;
-        await OnlineUserTracker.Add(sessionId, new UserInfo(UserProfile.UserId,
-            UserProfile.UserName,
-            UserProfile.Email,
-            UserProfile.DisplayName ?? string.Empty,
-            UserProfile.ProfilePictureDataUrl ?? string.Empty,
-            UserProfile.SuperiorName ?? string.Empty,
-            UserProfile.SuperiorId ?? string.Empty,
-            UserProfile.TenantId ?? string.Empty,
-            UserProfile.TenantName ?? string.Empty,
-            UserProfile.PhoneNumber,
-            UserProfile.AssignedRoles ?? Array.Empty<string>(),
-            UserPresence.Available));
+        if (SessionInfoAccessor.SessionInfo!=null)
+        {
+            currentUserId = SessionInfoAccessor.SessionInfo?.UserId;
+            await OnlineUserTracker.Initial(SessionInfoAccessor.SessionInfo);
+        }
     }
 
-    protected override ComputedState<UserInfo[]>.Options GetStateOptions()
+    protected override ComputedState<List<SessionInfo>>.Options GetStateOptions()
      => new() { UpdateDelayer = new UpdateDelayer(UIActionTracker, UpdateDelay) };
 
-    protected override Task<UserInfo[]> ComputeState(CancellationToken cancellationToken)
+    protected override Task<List<SessionInfo>> ComputeState(CancellationToken cancellationToken)
     {
         return OnlineUserTracker.GetOnlineUsers(cancellationToken);
     }
 
     public override async ValueTask DisposeAsync()
     {
-        await OnlineUserTracker.Remove(sessionId);
+        if (!string.IsNullOrEmpty(currentUserId)){
+            await OnlineUserTracker.Clear(currentUserId);
+        }
         GC.Collect();
     }
 }

@@ -1,5 +1,4 @@
-﻿using CleanArchitecture.Blazor.Application.Common.Security;
-using CleanArchitecture.Blazor.Domain.Identity;
+﻿using CleanArchitecture.Blazor.Application.Features.Tenants.DTOs;
 
 namespace CleanArchitecture.Blazor.Application.Features.Identity.DTOs;
 
@@ -16,7 +15,7 @@ public class ApplicationUserDto
 
     [Description("Tenant Id")] public string? TenantId { get; set; }
 
-    [Description("Tenant Name")] public string? TenantName { get; set; }
+    [Description("Tenant")] public TenantDto? Tenant { get; set; }
 
     [Description("Profile Photo")] public string? ProfilePictureDataUrl { get; set; }
 
@@ -26,7 +25,7 @@ public class ApplicationUserDto
 
     [Description("Superior Id")] public string? SuperiorId { get; set; }
 
-    [Description("Superior Name")] public string? SuperiorName { get; set; }
+    [Description("Superior")] public ApplicationUserDto? Superior { get; set; }
 
     [Description("Assigned Roles")] public string[]? AssignedRoles { get; set; }
 
@@ -42,7 +41,26 @@ public class ApplicationUserDto
     [Description("Email Confirmed")] public bool EmailConfirmed { get; set; }
 
     [Description("Status")] public DateTimeOffset? LockoutEnd { get; set; }
-
+    [Description("Time Zone")]
+    public string? TimeZoneId { get; set; }
+    [Description("Local Time Offset")]
+    public TimeSpan LocalTimeOffset => string.IsNullOrEmpty(TimeZoneId)
+    ? TimeZoneInfo.Local.BaseUtcOffset
+    : TimeZoneInfo.FindSystemTimeZoneById(TimeZoneId).BaseUtcOffset;
+    [Description("Language")]
+    public string? LanguageCode { get; set; }
+    [Description("Last Modified")]
+    public DateTime? LastModified { get; set; }
+    [Description("Last Modified By")]
+    public string? LastModifiedBy { get; set; }
+    [Description("Created")]
+    public DateTime? Created { get; set; }
+    [Description("Created By")]
+    public string? CreatedBy { get; set; }
+    [Description("Created By User")]
+    public ApplicationUserDto? CreatedByUser { get; set; }
+    [Description("Last Modified By User")]
+    public ApplicationUserDto? LastModifiedByUser { get; set; }
     public UserProfile ToUserProfile()
     {
         return new UserProfile
@@ -55,11 +73,13 @@ public class ApplicationUserDto
             Provider = Provider,
             UserName = UserName,
             TenantId = TenantId,
-            TenantName = TenantName,
+            TenantName = Tenant?.Name,
             SuperiorId = SuperiorId,
-            SuperiorName = SuperiorName,
+            SuperiorName = Superior?.UserName,
             AssignedRoles = AssignedRoles,
-            DefaultRole = DefaultRole
+            DefaultRole = DefaultRole,
+            TimeZoneId = TimeZoneId,
+            LanguageCode = LanguageCode
         };
     }
 
@@ -68,17 +88,7 @@ public class ApplicationUserDto
         return AssignedRoles?.Contains(role) ?? false;
     }
 
-    private class Mapping : Profile
-    {
-        public Mapping()
-        {
-            CreateMap<ApplicationUser, ApplicationUserDto>(MemberList.None)
-                .ForMember(x => x.EmailConfirmed, s => s.MapFrom(y => y.EmailConfirmed))
-                .ForMember(x => x.SuperiorName, s => s.MapFrom(y => y.Superior!.UserName))
-                .ForMember(x => x.TenantName, s => s.MapFrom(y => y.Tenant!.Name))
-                .ForMember(x => x.AssignedRoles, s => s.MapFrom(y => y.UserRoles.Select(r => r.Role.Name)));
-        }
-    }
+ 
 }
 
 public class ApplicationUserDtoValidator : AbstractValidator<ApplicationUserDto>

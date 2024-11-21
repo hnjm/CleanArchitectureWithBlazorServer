@@ -9,38 +9,28 @@ namespace CleanArchitecture.Blazor.Application.Features.Loggers.Commands.Clear;
 public class ClearLogsCommand : ICacheInvalidatorRequest<Result>
 {
     public string CacheKey => LogsCacheKey.GetAllCacheKey;
-    public CancellationTokenSource? SharedExpiryTokenSource => LogsCacheKey.GetOrCreateTokenSource();
+    public IEnumerable<string>? Tags => LogsCacheKey.Tags;
 }
 
 public class ClearLogsCommandHandler : IRequestHandler<ClearLogsCommand, Result>
 
 {
     private readonly IApplicationDbContext _context;
-    private readonly ICurrentUserService _currentUserService;
-    private readonly IStringLocalizer<ClearLogsCommandHandler> _localizer;
     private readonly ILogger<ClearLogsCommandHandler> _logger;
-    private readonly IMapper _mapper;
 
     public ClearLogsCommandHandler(
         IApplicationDbContext context,
-        IStringLocalizer<ClearLogsCommandHandler> localizer,
-        ILogger<ClearLogsCommandHandler> logger,
-        IMapper mapper,
-        ICurrentUserService currentUserService
+        ILogger<ClearLogsCommandHandler> logger
     )
     {
         _context = context;
-        _localizer = localizer;
         _logger = logger;
-        _mapper = mapper;
-        _currentUserService = currentUserService;
     }
 
     public async Task<Result> Handle(ClearLogsCommand request, CancellationToken cancellationToken)
     {
-        _context.Loggers.RemoveRange(_context.Loggers);
-        await _context.SaveChangesAsync(cancellationToken);
-        _logger.LogInformation("Logs have been erased by {@UserName:l}", _currentUserService.UserName);
+        await _context.Loggers.ExecuteDeleteAsync();
+        _logger.LogInformation("Logs have been erased");
         return await Result.SuccessAsync();
     }
 }

@@ -1,5 +1,5 @@
-﻿using CleanArchitecture.Blazor.Domain.Common.Entities;
-using MediatR;
+﻿using CleanArchitecture.Blazor.Application.Common.Interfaces.MediatorWrapper;
+using CleanArchitecture.Blazor.Domain.Common.Entities;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace CleanArchitecture.Blazor.Infrastructure.Persistence.Interceptors;
@@ -10,13 +10,13 @@ namespace CleanArchitecture.Blazor.Infrastructure.Persistence.Interceptors;
 /// </summary>
 public class DispatchDomainEventsInterceptor : SaveChangesInterceptor
 {
-    private readonly IMediator _mediator;
+    private readonly IScopedMediator _mediator;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="DispatchDomainEventsInterceptor"/> class.
     /// </summary>
     /// <param name="mediator">The mediator instance used for publishing domain events.</param>
-    public DispatchDomainEventsInterceptor(IMediator mediator)
+    public DispatchDomainEventsInterceptor(IScopedMediator mediator)
     {
         _mediator = mediator;
     }

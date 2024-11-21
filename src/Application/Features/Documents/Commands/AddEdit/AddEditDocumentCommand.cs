@@ -2,60 +2,38 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using CleanArchitecture.Blazor.Application.Features.Documents.Caching;
-using CleanArchitecture.Blazor.Application.Features.Documents.DTOs;
+using CleanArchitecture.Blazor.Application.Features.Documents.Mappers;
 
 namespace CleanArchitecture.Blazor.Application.Features.Documents.Commands.AddEdit;
 
 public class AddEditDocumentCommand : ICacheInvalidatorRequest<Result<int>>
 {
     [Description("Id")] public int Id { get; set; }
-
     [Description("Title")] public string? Title { get; set; }
-
     [Description("Description")] public string? Description { get; set; }
-
     [Description("Is Public")] public bool IsPublic { get; set; }
-
     [Description("URL")] public string? URL { get; set; }
-
     [Description("Document Type")] public DocumentType DocumentType { get; set; } = DocumentType.Document;
-
     [Description("Tenant Id")] public string? TenantId { get; set; }
-
     [Description("Tenant Name")] public string? TenantName { get; set; }
-
     [Description("Status")] public JobStatus Status { get; set; } = JobStatus.NotStart;
-
     [Description("Content")] public string? Content { get; set; }
-
     public UploadRequest? UploadRequest { get; set; }
+    public IEnumerable<string>? Tags => DocumentCacheKey.Tags;
 
-    public CancellationTokenSource? SharedExpiryTokenSource => DocumentCacheKey.GetOrCreateTokenSource();
-
-    private class Mapping : Profile
-    {
-        public Mapping()
-        {
-            CreateMap<DocumentDto, AddEditDocumentCommand>(MemberList.None);
-            CreateMap<AddEditDocumentCommand, Document>(MemberList.None);
-        }
-    }
 }
 
 public class AddEditDocumentCommandHandler : IRequestHandler<AddEditDocumentCommand, Result<int>>
 {
     private readonly IApplicationDbContext _context;
-    private readonly IMapper _mapper;
     private readonly IUploadService _uploadService;
 
     public AddEditDocumentCommandHandler(
         IApplicationDbContext context,
-        IMapper mapper,
         IUploadService uploadService
     )
     {
         _context = context;
-        _mapper = mapper;
         _uploadService = uploadService;
     }
 
@@ -63,8 +41,11 @@ public class AddEditDocumentCommandHandler : IRequestHandler<AddEditDocumentComm
     {
         if (request.Id > 0)
         {
-            var document = await _context.Documents.FindAsync(new object[] { request.Id }, cancellationToken);
-            _ = document ?? throw new NotFoundException($"Document {request.Id} Not Found.");
+            var document = await _context.Documents.FindAsync(request.Id, cancellationToken);
+            if (document == null)
+            {
+                return await Result<int>.FailureAsync($"Document with id: [{request.Id}] not found.");
+            }
             document.AddDomainEvent(new UpdatedEvent<Document>(document));
             if (request.UploadRequest != null) document.URL = await _uploadService.UploadAsync(request.UploadRequest);
             document.Title = request.Title;
@@ -76,7 +57,7 @@ public class AddEditDocumentCommandHandler : IRequestHandler<AddEditDocumentComm
         }
         else
         {
-            var document = _mapper.Map<Document>(request);
+            var document = DocumentMapper.FromEditCommand(request);
             if (request.UploadRequest != null) document.URL = await _uploadService.UploadAsync(request.UploadRequest);
             document.AddDomainEvent(new CreatedEvent<Document>(document));
             _context.Documents.Add(document);

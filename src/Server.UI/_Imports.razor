@@ -3,6 +3,7 @@
 @using System.Reflection
 @using System.Text
 @using System.ComponentModel
+@using CleanArchitecture.Blazor.Application.Common.Interfaces.MediatorWrapper
 @using CleanArchitecture.Blazor.Server.UI.Services
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.Forms
@@ -17,9 +18,7 @@
 @using Microsoft.AspNetCore.Identity
 @using Microsoft.JSInterop
 @using MudBlazor
-@using BlazorTime
 @using MediatR
-@using AutoMapper
 @using FluentValidation;
 @using CleanArchitecture.Blazor.Domain
 @using CleanArchitecture.Blazor.Application.Common.ExceptionHandlers
@@ -35,6 +34,8 @@
 @using CleanArchitecture.Blazor.Server.UI
 @using CleanArchitecture.Blazor.Server.UI.Shared
 @using CleanArchitecture.Blazor.Server.UI.Components
+@using CleanArchitecture.Blazor.Server.UI.Components.Forms
+@using CleanArchitecture.Blazor.Server.UI.Components.Breadcrumbs
 @using CleanArchitecture.Blazor.Server.UI.Components.LoadingButton
 @using CleanArchitecture.Blazor.Server.UI.Components.Autocompletes
 @using CleanArchitecture.Blazor.Server.UI.Components.Dialogs
@@ -58,6 +59,5 @@
 @inject IValidationService Validator
 @inject IJSRuntime JS
 @inject IMediator Mediator
-@inject IMapper Mapper
 @inject NavigationManager Navigation
 @inject DialogServiceHelper DialogServiceHelper

@@ -1,5 +1,4 @@
 ﻿using System.Collections.ObjectModel;
-using System.Configuration;
 using System.Data;
 using CleanArchitecture.Blazor.Infrastructure.Configurations;
 using CleanArchitecture.Blazor.Infrastructure.Constants.Database;
@@ -22,6 +21,7 @@ public static class SerilogExtensions
 {
     public static void RegisterSerilog(this WebApplicationBuilder builder)
     {
+        Serilog.Debugging.SelfLog.Enable(msg => Console.WriteLine(msg));
         builder.Host.UseSerilog((context, configuration) =>
             configuration.ReadFrom.Configuration(context.Configuration)
                 .MinimumLevel.Override("Microsoft", LogEventLevel.Error)
@@ -76,7 +76,7 @@ public static class SerilogExtensions
                 WriteToNpgsql(serilogConfig, connectionString);
                 break;
             case DbProviderKeys.SqLite:
-                WriteToSqLite(serilogConfig, "BlazorDashboardDb.db");
+                WriteToSqLite(serilogConfig, "\\BlazorDashboardDb.db");
                 break;
         }
     }
@@ -94,7 +94,8 @@ public static class SerilogExtensions
             AutoCreateSqlDatabase = false,
             AutoCreateSqlTable = false,
             BatchPostingLimit = 100,
-            BatchPeriod = new TimeSpan(0, 0, 20)
+            BatchPeriod = new TimeSpan(0, 0, 20),
+            
         };
 
         ColumnOptions columnOpts = new()
@@ -114,20 +115,19 @@ public static class SerilogExtensions
             {
                 new()
                 {
-                    ColumnName = "ClientIP", PropertyName = "ClientIP", DataType = SqlDbType.NVarChar, DataLength = 64
+                    ColumnName = "ClientIP", PropertyName = "ClientIP",AllowNull=true, DataType = SqlDbType.NVarChar, DataLength = 64
                 },
                 new()
                 {
-                    ColumnName = "UserName", PropertyName = "UserName", DataType = SqlDbType.NVarChar, DataLength = 64
+                    ColumnName = "UserName", PropertyName = "UserName",AllowNull=true, DataType = SqlDbType.NVarChar
                 },
                 new()
                 {
-                    ColumnName = "ClientAgent", PropertyName = "ClientAgent", DataType = SqlDbType.NVarChar,
-                    DataLength = -1
+                    ColumnName = "ClientAgent", PropertyName = "ClientAgent",AllowNull=true, DataType = SqlDbType.NVarChar
                 }
             },
             TimeStamp = { ConvertToUtc = true, ColumnName = "TimeStamp" },
-            LogEvent = { DataLength = 2048 }
+            LogEvent = { DataLength = -1 }
         };
         columnOpts.PrimaryKey = columnOpts.Id;
         columnOpts.TimeStamp.NonClusteredIndex = true;
@@ -156,7 +156,7 @@ public static class SerilogExtensions
             { "properties", new PropertiesColumnWriter(NpgsqlDbType.Varchar) },
             { "log_event", new LogEventSerializedColumnWriter(NpgsqlDbType.Varchar) },
             { "user_name", new SinglePropertyColumnWriter("UserName", PropertyWriteMethod.Raw, NpgsqlDbType.Varchar) },
-            { "client_ip", new SinglePropertyColumnWriter("ClientIp", PropertyWriteMethod.Raw, NpgsqlDbType.Varchar) },
+            { "client_ip", new SinglePropertyColumnWriter("ClientIP", PropertyWriteMethod.Raw, NpgsqlDbType.Varchar) },
             {
                 "client_agent",
                 new SinglePropertyColumnWriter("ClientAgent", PropertyWriteMethod.ToString, NpgsqlDbType.Varchar)
@@ -218,7 +218,17 @@ internal class UserInfoEnricher : ILogEventEnricher
     }
     public void Enrich(LogEvent logEvent, ILogEventPropertyFactory propertyFactory)
     {
-       logEvent.AddPropertyIfAbsent(propertyFactory.CreateProperty(
-                "UserName", _httpContextAccessor.HttpContext?.User?.Identity?.Name ?? ""));
+        var userName = _httpContextAccessor.HttpContext?.User?.Identity?.Name ?? "";
+        var headers = _httpContextAccessor.HttpContext?.Request?.Headers;
+        var clientIp = headers != null && headers.ContainsKey("X-Forwarded-For")
+        ? headers["X-Forwarded-For"].ToString().Split(',').First().Trim()
+        : _httpContextAccessor.HttpContext?.Connection?.RemoteIpAddress?.ToString() ?? "";
+        var clientAgent = headers != null && headers.ContainsKey("User-Agent")
+            ? headers["User-Agent"].ToString()
+            : "";
+
+        logEvent.AddPropertyIfAbsent(propertyFactory.CreateProperty("UserName", userName));
+        logEvent.AddPropertyIfAbsent(propertyFactory.CreateProperty("ClientIP", clientIp));
+        logEvent.AddPropertyIfAbsent(propertyFactory.CreateProperty("ClientAgent", clientAgent));
     }
 }

@@ -1,12 +1,14 @@
 ﻿namespace CleanArchitecture.Blazor.Server.UI.Services.JsInterop;
 
-public class JSInteropConstants
+public static class JSInteropConstants
 {
-    public static string ExternalLogin = "externalLogin";
-    public static string ExternalLogout = "externalLogout";
-    public static string ShowOpenSeadragon = "showOpenSeadragon";
-    public static string ClearInput = "clearInput";
-    public static string PreviewImage = "previewImage";
-    public static string CreateOrgChart = "createOrgChart";
-    public static string GetTimezoneOffset = "getTimezoneOffset";
+    public const string ExternalLogin = "externalLogin";
+    public const string ExternalLogout = "externalLogout";
+    public const string ShowOpenSeadragon = "showOpenSeadragon";
+    public const string ClearInput = "clearInput";
+    public const string PreviewImage = "previewImage";
+    public const string CreateOrgChart = "createOrgChart";
+    public const string GetTimezoneOffset = "getTimezoneOffset";
+    public const string GetTimezoneOffsetByTimeZone = "getTimezoneOffsetByTimeZone";
+    public const string HistoryGo = "historyGo";
 }

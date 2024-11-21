@@ -1,4 +1,5 @@
-﻿@using ResizeMode = SixLabors.ImageSharp.Processing.ResizeMode
+﻿@using CleanArchitecture.Blazor.Application.Features.Tenants.DTOs
+@using ResizeMode = SixLabors.ImageSharp.Processing.ResizeMode
 @using Size = SixLabors.ImageSharp.Size
 @using Image = SixLabors.ImageSharp.Image
 @using SixLabors.ImageSharp.Processing
@@ -15,8 +16,8 @@
 @inject IStringLocalizer<Users> L
 
 <MudForm Model="@Model" @ref="@_form" Validation="@(Validator.ValidateValue(Model))">
-    <input For="@(() => Model.Id)" @bind-value="Model.Id" type="hidden"/>
-    <input For="@(() => Model.ProfilePictureDataUrl)" @bind-value="Model.ProfilePictureDataUrl" type="hidden"/>
+    <input For="@(() => Model.Id)" @bind-value="Model.Id" type="hidden" @bind-value:event="oninput" />
+    <input For="@(() => Model.ProfilePictureDataUrl)" @bind-value="Model.ProfilePictureDataUrl" type="hidden" @bind-value:event="oninput"/>
 
     <MudGrid Spacing="2">
         <MudItem sm="12">
@@ -40,58 +41,59 @@
                         </ActivatorContent>
                     </MudFileUpload>
                 </MudTooltip>
-               
+
             </div>
         </MudItem>
         <MudItem sm="6" xs="12">
-            <MudSelect For="@(() => Model.TenantId)"
-                       T="string"
-                       Label="@L["Select Tenant"]"
-                       Required="true"
-                       ValueChanged="OnTenantIdChanged"
-                       Value="@Model.TenantId">
-                @foreach (var item in TenantsService.DataSource)
-                {
-                    <MudSelectItem T="string" Value="@item.Id">@item.Name</MudSelectItem>
-                }
-            </MudSelect>
+            <MultiTenantAutocomplete For="@(() => Model.Tenant)"
+                                     T="TenantDto"
+                                     Label="@L[Model.GetMemberDescription(x=>x.Tenant)]"
+                                     Required="true"
+                                     ValueChanged="@(x=>TenantChanged(x))"
+                                     Value="@Model.Tenant">
+
+            </MultiTenantAutocomplete>
         </MudItem>
         <MudItem xs="12" sm="6">
-            <MudTextField For="@(() => Model.Provider)" @bind-Value="Model.Provider" Label="@L["Provider"]" Variant="Variant.Text"></MudTextField>
+            <MudTextField For="@(() => Model.Provider)" @bind-Value="Model.Provider" Label="@L[Model.GetMemberDescription(x=>x.Provider)]"  ReadOnly="true"></MudTextField>
         </MudItem>
 
         <MudItem xs="12" sm="6">
-            <MudTextField For="@(() => Model.UserName)" @bind-Value="Model.UserName" Label="@L["User Name"]" Variant="Variant.Text" Required="true"></MudTextField>
+            <MudTextField For="@(() => Model.UserName)" @bind-Value="Model.UserName" Label="@L[Model.GetMemberDescription(x=>x.UserName)]"  Required="true"></MudTextField>
         </MudItem>
         <MudItem xs="12" sm="6">
-            <PickSuperiorIdAutocomplete For="@(() => Model.SuperiorId)"
-                                        OwnerName="@Model.UserName"
-                                        Clearable="true"
-                                        TenantId="@Model.TenantId"
-                                        Label="@L["Select Superior"]"
-                                        @bind-Value="@Model.SuperiorId">
-            </PickSuperiorIdAutocomplete>
-
-        </MudItem>
-        <MudItem xs="12" sm="6">
-            <MudTextField For="@(() => Model.DisplayName)" @bind-Value="Model.DisplayName" Label="@L["Ful Name"]" Variant="Variant.Text"></MudTextField>
-        </MudItem>
-        <MudItem xs="12" sm="6">
-            <MudTextField For="@(() => Model.Email)" @bind-Value="Model.Email" Label="@L["E-mail"]" Variant="Variant.Text" Required="true"></MudTextField>
-        </MudItem>
-        <MudItem xs="12" sm="6">
-            <MudTextField For="@(() => Model.PhoneNumber)" @bind-Value="Model.PhoneNumber" Label="@L["Phone Number"]" Variant="Variant.Text"></MudTextField>
-        </MudItem>
-
-
-        <MudItem xs="12" sm="6">
-            <MudText Typo="Typo.caption">@L["Status"]</MudText>
             <div class="d-fex">
-                <MudCheckBox For="@(() => Model.IsActive)" @bind-Value="Model.IsActive" Label="@L["Is Active"]"></MudCheckBox>
+                <MudCheckBox For="@(() => Model.IsActive)" @bind-Value="Model.IsActive" Label="@L[Model.GetMemberDescription(x=>x.IsActive)]"></MudCheckBox>
             </div>
         </MudItem>
+        <MudItem xs="12" sm="6">
+            <MudTextField For="@(() => Model.DisplayName)" @bind-Value="Model.DisplayName" Label="@L[Model.GetMemberDescription(x=>x.DisplayName)]" ></MudTextField>
+        </MudItem>
+        <MudItem xs="12" sm="6">
+            <PickSuperiorIdAutocomplete For="@(() => Model.Superior)" T="ApplicationUserDto"
+                                        OwnerName="@Model.UserName"
+                                        Clearable="true"
+                                        TenantId="@Model.Tenant?.Id"
+                                        Label="@L[Model.GetMemberDescription(x=>x.Superior)]"
+                                        @bind-Value="@Model.Superior">
+            </PickSuperiorIdAutocomplete>
+        </MudItem>
+        <MudItem xs="12" sm="6">
+            <MudTextField For="@(() => Model.Email)" @bind-Value="Model.Email" Label="@L[Model.GetMemberDescription(x=>x.Email)]"  Required="true"></MudTextField>
+        </MudItem>
+        <MudItem xs="12" sm="6">
+            <MudTextField For="@(() => Model.PhoneNumber)" @bind-Value="Model.PhoneNumber" Label="@L[Model.GetMemberDescription(x=>x.PhoneNumber)]" ></MudTextField>
+        </MudItem>
+        <MudItem sm="6" xs="12">
+            <TimeZoneAutocomplete T="string" For="@(() => Model.TimeZoneId)"  @bind-Value="Model.TimeZoneId" Label="@L[Model.GetMemberDescription(x=>x.TimeZoneId)]" ></TimeZoneAutocomplete>
+        </MudItem>
+        <MudItem sm="6" xs="12">
+            <LanguageAutocomplete T="string" For="@(() => Model.LanguageCode)"  @bind-Value="Model.LanguageCode" Label="@L[Model.GetMemberDescription(x=>x.LanguageCode)]" ></LanguageAutocomplete>
+        </MudItem>
+
+
         <MudItem xs="12" sm="12">
-            <MudText Typo="Typo.caption">@L["Assign Roles"]</MudText>
+            <MudText Typo="Typo.body1">@L["Assign Roles"]</MudText>
             <MudGrid Class="mt-1" Spacing="2">
                 @if (Roles.Any())
                 {
@@ -111,20 +113,33 @@
 
             </MudGrid>
         </MudItem>
+        <MudItem sm="6" xs="12">
+            <MudTextField For="@(() => Model.CreatedBy)" Disabled  Value="Model.CreatedByUser?.UserName" Label="@L[Model.GetMemberDescription(x=>x.CreatedBy)]" ></MudTextField>
+        </MudItem>
+        <MudItem sm="6" xs="12">
+            <MudTextField T="string" Disabled  Value="@(Model.Created.ToLocalTime(UserProfile?.LocalTimeOffset))" Label="@L[Model.GetMemberDescription(x=>x.Created)]" ></MudTextField>
+        </MudItem>
+        <MudItem sm="6" xs="12">
+            <MudTextField For="@(() => Model.LastModifiedBy)" Disabled  Value="Model.LastModifiedByUser?.UserName" Label="@L[Model.GetMemberDescription(x=>x.LastModifiedBy)]" ></MudTextField>
+        </MudItem>
+        <MudItem sm="6" xs="12">
+            <MudTextField T="string" Disabled  Value="@(Model.LastModified.ToLocalTime(UserProfile?.LocalTimeOffset))" Label="@L[Model.GetMemberDescription(x=>x.LastModified)]" ></MudTextField>
+        </MudItem>
     </MudGrid>
 </MudForm>
 
-@code{
-
+@code {
+    [Parameter]
+    public UserProfile? UserProfile { get; set; }
     public class CheckItem
     {
         public string Key { get; set; } = string.Empty;
         public bool Value { get; set; }
     }
     private RoleManager<ApplicationRole> RoleManager = null!;
-    [EditorRequired] [Parameter] public ApplicationUserDto Model { get; set; } = default!;
+    [EditorRequired][Parameter] public ApplicationUserDto Model { get; set; } = default!;
 
-    [EditorRequired] [Parameter] public EventCallback<ApplicationUserDto> OnFormSubmit { get; set; }
+    [EditorRequired][Parameter] public EventCallback<ApplicationUserDto> OnFormSubmit { get; set; }
 
 
     private MudForm? _form = default!;
@@ -151,9 +166,10 @@
             }
         }
     }
-    private async Task OnTenantIdChanged(string tenantId)
+    private async Task TenantChanged(TenantDto? x)
     {
-        Model.TenantId = tenantId;
+        Model.TenantId = x?.Id;
+        Model.Tenant = x;
         await GetRoles(Model.TenantId);
     }
     private async Task UploadPhoto(IBrowserFile file)
@@ -172,8 +188,9 @@
                 var filename = file.Name;
                 var fi = new FileInfo(filename);
                 var ext = fi.Extension;
-                var result = await UploadService.UploadAsync(new UploadRequest(Guid.NewGuid() + ext, UploadType.ProfilePicture, outStream.ToArray()));
+                var result = await UploadService.UploadAsync(new UploadRequest($"{Model.Id}_{DateTime.UtcNow.Ticks}.png", UploadType.ProfilePicture, outStream.ToArray()));
                 Model.ProfilePictureDataUrl = result;
+
                 //Do your validations here
                 Snackbar.Add(ConstantString.UploadSuccess, Severity.Info);
             }

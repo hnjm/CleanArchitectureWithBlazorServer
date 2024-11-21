@@ -163,7 +163,7 @@
   <data name="Reset password successfully." xml:space="preserve">
     <value>Restablecer contraseña exitosamente</value>
   </data>
-  <data name="Search for user name" xml:space="preserve">
+  <data name="Search by user name" xml:space="preserve">
     <value>Buscar nombre de usuario</value>
   </data>
   <data name="Set Active" xml:space="preserve">
@@ -279,5 +279,41 @@
   </data>
   <data name="Click to change status to inactive." xml:space="preserve">
     <value>Haga clic para cambiar el estado a inactivo.</value>
+  </data>
+  <data name="No permission to change status." xml:space="preserve">
+    <value>No hay permiso para cambiar el estado.</value>
+  </data>
+  <data name="Send Reset Password Email" xml:space="preserve">
+    <value>Enviar correo electrónico para restablecer contraseña</value>
+  </data>
+  <data name="No roles available for this tenant." xml:space="preserve">
+    <value>No hay roles disponibles para este inquilino.</value>
+  </data>
+  <data name="Search by role name" xml:space="preserve">
+    <value>Buscar por nombre de rol</value>
+  </data>
+  <data name="Superior" xml:space="preserve">
+    <value>Superior</value>
+  </data>
+  <data name="Tenant" xml:space="preserve">
+    <value>Inquilino</value>
+  </data>
+  <data name="Language" xml:space="preserve">
+    <value>Idioma</value>
+  </data>
+  <data name="Last Modified By" xml:space="preserve">
+    <value>Última modificación realizada por</value>
+  </data>
+  <data name="Last Modified" xml:space="preserve">
+    <value>Última modificación</value>
+  </data>
+  <data name="Created By" xml:space="preserve">
+    <value>Creado por</value>
+  </data>
+  <data name="Created" xml:space="preserve">
+    <value>Creado</value>
+  </data>
+  <data name="Time Zone" xml:space="preserve">
+    <value>Zona horaria</value>
   </data>
 </root>

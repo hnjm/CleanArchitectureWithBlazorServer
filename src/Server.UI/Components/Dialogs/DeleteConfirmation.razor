@@ -3,7 +3,7 @@
 <MudDialog>
     <TitleContent>
         <MudText Typo="Typo.h6">
-            <MudIcon Icon="@Icons.Material.Filled.Delete" Class="mr-3 mb-n1" />
+            <MudIcon Icon="@Icons.Material.Filled.QuestionMark" Class="mb-n1" />
             @ConstantString.DeleteConfirmationTitle
         </MudText>
     </TitleContent>
@@ -12,14 +12,14 @@
         <MudText>@ContentText</MudText>
     </DialogContent>
     <DialogActions>
-        <MudButton StartIcon="@Icons.Material.Filled.Cancel" OnClick="Cancel">@ConstantString.Cancel</MudButton>
-        <MudButton StartIcon="@Icons.Material.Filled.Delete" Color="Color.Error" Variant="Variant.Filled" OnClick="Submit">@ConstantString.Confirm</MudButton>
+        <MudButton StartIcon="@Icons.Material.Filled.Cancel" OnClick="Cancel" title="@ConstantString.Cancel">@ConstantString.Cancel</MudButton>
+        <MudButton StartIcon="@Icons.Material.Outlined.Delete" Color="Color.Error"  title="@ConstantString.Delete" OnClick="Submit">@ConstantString.Confirm</MudButton>
     </DialogActions>
 </MudDialog>
 
 @code
 {
-    [CascadingParameter] private MudDialogInstance MudDialog { get; set; } = default!;
+    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = default!;
 
     [EditorRequired][Parameter] public string? ContentText { get; set; }
     [EditorRequired][Parameter] public IRequest<Result<int>> Command { get; set; } = default!;
@@ -27,15 +27,20 @@
     private async Task Submit()
     {
         var result = await Mediator.Send(Command);
-        if (result.Succeeded)
-        {
-            Snackbar.Add($"{ConstantString.DeleteSuccess}", Severity.Info);
-            MudDialog.Close(DialogResult.Ok(true));
-        }
-        else
-        {
-            Snackbar.Add($"{result.ErrorMessage}", Severity.Error);
-        }
+        await result.MatchAsync(
+          async data=>
+          {
+              Snackbar.Add($"{ConstantString.DeleteSuccess}", Severity.Info);
+              MudDialog.Close(DialogResult.Ok(true));
+              return data;
+          },
+          errors =>
+          {
+              Snackbar.Add($"{errors}", Severity.Error);
+              return Task.FromResult(0);
+          }
+        );
+        
     }
 
     private void Cancel()

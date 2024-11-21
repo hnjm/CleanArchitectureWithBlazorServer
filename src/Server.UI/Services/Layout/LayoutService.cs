@@ -1,6 +1,5 @@
 ﻿using System.Globalization;
 using CleanArchitecture.Blazor.Server.UI.Services.UserPreferences;
-using Microsoft.IdentityModel.Tokens;
 
 namespace CleanArchitecture.Blazor.Server.UI.Services.Layout;
 
@@ -22,7 +21,7 @@ public class LayoutService
     /// <summary>
     /// Gets or sets the user preferences.
     /// </summary>
-    public UserPreferences.UserPreferences UserPreferences { get; private set; } = new();
+    public UserPreferences.UserPreference UserPreferences { get; private set; } = new();
 
     /// <summary>
     /// Gets or sets a value indicating whether the layout is right-to-left.
@@ -56,7 +55,7 @@ public class LayoutService
     /// <param name="isDarkModeDefaultTheme">The value indicating whether dark mode is the default theme.</param>
     public async Task ApplyUserPreferences(bool isDarkModeDefaultTheme)
     {
-        UserPreferences = await UserPreferencesService.LoadUserPreferences();
+        UserPreferences = await UserPreferencesService.LoadUserPreferences().ConfigureAwait(false);
 
         IsDarkMode = UserPreferences.DarkLightTheme switch
         {
@@ -76,24 +75,31 @@ public class LayoutService
         CurrentTheme.LayoutProperties.DefaultBorderRadius = UserPreferences.BorderRadius + "px";
         CurrentTheme.Typography.Default.FontSize =
             UserPreferences.DefaultFontSize.ToString("0.0000", CultureInfo.InvariantCulture) + "rem";
+        CurrentTheme.Typography.Subtitle1.FontSize =
+            UserPreferences.DefaultFontSize.ToString("0.0000", CultureInfo.InvariantCulture) + "rem";
         CurrentTheme.Typography.Button.FontSize =
             UserPreferences.ButtonFontSize.ToString("0.0000", CultureInfo.InvariantCulture) + "rem";
-        CurrentTheme.Typography.Button.LineHeight = UserPreferences.ButtonLineHeight;
+        CurrentTheme.Typography.Button.LineHeight = UserPreferences.ButtonLineHeight.ToString();
+        CurrentTheme.Typography.H5.FontSize =
+            UserPreferences.H5FontSize.ToString("0.0000", CultureInfo.InvariantCulture) + "rem";
+        CurrentTheme.Typography.H6.FontSize =
+            UserPreferences.H6FontSize.ToString("0.0000", CultureInfo.InvariantCulture) + "rem";
         CurrentTheme.Typography.Body1.FontSize =
             UserPreferences.Body1FontSize.ToString("0.0000", CultureInfo.InvariantCulture) + "rem";
 
-        CurrentTheme.Typography.Body1.LineHeight = UserPreferences.Body1LineHeight;
+        CurrentTheme.Typography.Body1.LineHeight = UserPreferences.Body1LineHeight.ToString();
         CurrentTheme.Typography.Body1.LetterSpacing = UserPreferences.Body1LetterSpacing.ToString("0.0000", CultureInfo.InvariantCulture) + "rem";
         CurrentTheme.Typography.Body2.FontSize =
             UserPreferences.Body2FontSize.ToString("0.0000", CultureInfo.InvariantCulture) + "rem";
-        CurrentTheme.Typography.Body2.LineHeight = UserPreferences.Body1LineHeight;
+        CurrentTheme.Typography.Body2.LineHeight = UserPreferences.Body1LineHeight.ToString();
         CurrentTheme.Typography.Body2.LetterSpacing = UserPreferences.Body1LetterSpacing.ToString("0.0000", CultureInfo.InvariantCulture) + "rem";
 
         CurrentTheme.Typography.Caption.FontSize =
             UserPreferences.CaptionFontSize.ToString("0.0000", CultureInfo.InvariantCulture) + "rem";
-        CurrentTheme.Typography.Caption.LineHeight = UserPreferences.CaptionLineHeight;
+        CurrentTheme.Typography.Caption.LineHeight = UserPreferences.CaptionLineHeight.ToString();
         CurrentTheme.Typography.Overline.FontSize =
             UserPreferences.OverlineFontSize.ToString("0.0000", CultureInfo.InvariantCulture) + "rem";
+        CurrentTheme.Typography.Overline.LineHeight = UserPreferences.OverlineLineHeight.ToString();
         CurrentTheme.Typography.Subtitle1.FontSize =
             UserPreferences.Subtitle1FontSize.ToString("0.0000", CultureInfo.InvariantCulture) + "rem";
         CurrentTheme.Typography.Subtitle2.FontSize =
@@ -118,7 +124,7 @@ public class LayoutService
     /// </summary>
     /// <param name="newValue">The new value of the system preference.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
-    public async Task OnSystemPreferenceChanged(bool newValue)
+    public Task OnSystemPreferenceChanged(bool newValue)
     {
         _systemPreferences = newValue;
         if (DarkModeToggle == DarkLightMode.System)
@@ -127,7 +133,7 @@ public class LayoutService
             OnMajorUpdateOccured();
         }
 
-        await Task.CompletedTask;
+        return Task.CompletedTask;
     }
 
     /// <summary>
@@ -153,7 +159,7 @@ public class LayoutService
         }
 
         UserPreferences.DarkLightTheme = DarkModeToggle;
-        await UserPreferencesService.SaveUserPreferences(UserPreferences);
+        await UserPreferencesService.SaveUserPreferences(UserPreferences).ConfigureAwait(false);
         OnMajorUpdateOccured();
     }
 
@@ -165,7 +171,7 @@ public class LayoutService
     {
         IsRTL = !IsRTL;
         UserPreferences.RightToLeft = IsRTL;
-        await UserPreferencesService.SaveUserPreferences(UserPreferences);
+        await UserPreferencesService.SaveUserPreferences(UserPreferences).ConfigureAwait(false);
         OnMajorUpdateOccured();
     }
 
@@ -176,7 +182,7 @@ public class LayoutService
     public async Task SetRightToLeft()
     {
         if (!IsRTL)
-            await ToggleRightToLeft();
+            await ToggleRightToLeft().ConfigureAwait(false);
     }
 
     /// <summary>
@@ -186,7 +192,7 @@ public class LayoutService
     public async Task SetLeftToRight()
     {
         if (IsRTL)
-            await ToggleRightToLeft();
+            await ToggleRightToLeft().ConfigureAwait(false);
     }
 
     /// <summary>
@@ -209,7 +215,7 @@ public class LayoutService
         CurrentTheme.PaletteLight.Secondary = color;
         CurrentTheme.PaletteDark.Secondary = color;
         UserPreferences.SecondaryColor = color;
-        await UserPreferencesService.SaveUserPreferences(UserPreferences);
+        await UserPreferencesService.SaveUserPreferences(UserPreferences).ConfigureAwait(false);
         OnMajorUpdateOccured();
     }
 
@@ -222,7 +228,7 @@ public class LayoutService
     {
         CurrentTheme.LayoutProperties.DefaultBorderRadius = size + "px";
         UserPreferences.BorderRadius = size;
-        await UserPreferencesService.SaveUserPreferences(UserPreferences);
+        await UserPreferencesService.SaveUserPreferences(UserPreferences).ConfigureAwait(false);
         OnMajorUpdateOccured();
     }
 
@@ -231,7 +237,7 @@ public class LayoutService
     /// </summary>
     /// <param name="preferences">The updated user preferences.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
-    public async Task UpdateUserPreferences(UserPreferences.UserPreferences preferences)
+    public async Task UpdateUserPreferences(UserPreference preferences)
     {
         UserPreferences = preferences;
         IsDarkMode = UserPreferences.DarkLightTheme switch
@@ -251,31 +257,37 @@ public class LayoutService
         CurrentTheme.LayoutProperties.DefaultBorderRadius = UserPreferences.BorderRadius + "px";
         CurrentTheme.Typography.Default.FontSize =
             UserPreferences.DefaultFontSize.ToString("0.0000", CultureInfo.InvariantCulture) + "rem";
+        CurrentTheme.Typography.Subtitle1.FontSize =
+            UserPreferences.DefaultFontSize.ToString("0.0000", CultureInfo.InvariantCulture) + "rem";
         CurrentTheme.Typography.Button.FontSize =
             UserPreferences.ButtonFontSize.ToString("0.0000", CultureInfo.InvariantCulture) + "rem";
-        CurrentTheme.Typography.Button.LineHeight = UserPreferences.ButtonLineHeight;
+        CurrentTheme.Typography.Button.LineHeight = UserPreferences.ButtonLineHeight.ToString();
         CurrentTheme.Typography.Body1.FontSize =
             UserPreferences.Body1FontSize.ToString("0.0000", CultureInfo.InvariantCulture) + "rem";
-
-        CurrentTheme.Typography.Body1.LineHeight = UserPreferences.Body1LineHeight;
+        CurrentTheme.Typography.H5.FontSize =
+            UserPreferences.H5FontSize.ToString("0.0000", CultureInfo.InvariantCulture) + "rem";
+        CurrentTheme.Typography.H6.FontSize =
+            UserPreferences.H6FontSize.ToString("0.0000", CultureInfo.InvariantCulture) + "rem";
+        CurrentTheme.Typography.Body1.LineHeight = UserPreferences.Body1LineHeight.ToString();
         CurrentTheme.Typography.Body1.LetterSpacing = UserPreferences.Body1LetterSpacing.ToString("0.0000", CultureInfo.InvariantCulture) + "rem";
         CurrentTheme.Typography.Body2.FontSize =
             UserPreferences.Body2FontSize.ToString("0.0000", CultureInfo.InvariantCulture) + "rem";
-        CurrentTheme.Typography.Body2.LineHeight = UserPreferences.Body1LineHeight;
+        CurrentTheme.Typography.Body2.LineHeight = UserPreferences.Body1LineHeight.ToString();
         CurrentTheme.Typography.Body2.LetterSpacing = UserPreferences.Body1LetterSpacing.ToString("0.0000", CultureInfo.InvariantCulture) + "rem";
 
         CurrentTheme.Typography.Caption.FontSize =
             UserPreferences.CaptionFontSize.ToString("0.0000", CultureInfo.InvariantCulture) + "rem";
-        CurrentTheme.Typography.Caption.LineHeight = UserPreferences.CaptionLineHeight;
+        CurrentTheme.Typography.Caption.LineHeight = UserPreferences.CaptionLineHeight.ToString();
         CurrentTheme.Typography.Overline.FontSize =
             UserPreferences.OverlineFontSize.ToString("0.0000", CultureInfo.InvariantCulture) + "rem";
+        CurrentTheme.Typography.Overline.LineHeight = UserPreferences.OverlineLineHeight.ToString();
         CurrentTheme.Typography.Subtitle1.FontSize =
             UserPreferences.Subtitle1FontSize.ToString("0.0000", CultureInfo.InvariantCulture) + "rem";
         CurrentTheme.Typography.Subtitle2.FontSize =
             UserPreferences.Subtitle1FontSize.ToString("0.0000", CultureInfo.InvariantCulture) + "rem";
 
 
-        await UserPreferencesService.SaveUserPreferences(UserPreferences);
+        await UserPreferencesService.SaveUserPreferences(UserPreferences).ConfigureAwait(false);
         OnMajorUpdateOccured();
     }
 }

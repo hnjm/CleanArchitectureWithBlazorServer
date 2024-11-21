@@ -15,8 +15,8 @@
                  Color="Color.Primary"
                  Icon="@Icons.Custom.Brands.MudBlazor"
                  Size="Size.Large"/>
-        <MudText Typo="Typo.subtitle2">
-            <b>@L[ApplicationSettings.AppName]</b>
+        <MudText Typo="Typo.h6">
+            @L[ApplicationSettings.AppName]
         </MudText>
     </MudDrawerHeader>
 
@@ -26,7 +26,7 @@
             @if (section is not null)
             {
                 <div class="@(LayoutService.IsRTL ? "mr-6" : "ml-6") my-3">
-                    <MudText Typo="Typo.caption">
+                    <MudText Typo="Typo.subtitle1">
                         <b>
                             @(L[section.Title])
                         </b>
@@ -43,7 +43,7 @@
                             <MudNavGroup Icon="@sectionItem.Icon" Title="@L[sectionItem.Title]" Expanded="Expanded(sectionItem)">
                                 @foreach (var menuItem in sectionItem.MenuItems.Where(x => x.Roles == null || x.Roles.Any(x => Roles.Contains(x))))
                                 {
-                                    <MudNavLink Disabled="@(menuItem.PageStatus != PageStatus.Completed)" Href="@(menuItem.Href)" Target="@(menuItem.Target)" Match="NavLinkMatch.All">
+                                    <MudNavLink Disabled="@(menuItem.PageStatus != PageStatus.Completed)" Href="@(menuItem.Href)" Target="@(menuItem.Target)" Match="NavLinkMatch.Prefix">
                                         <div class="d-flex">
                                             @(L[menuItem.Title])
                                             @if (menuItem.PageStatus != PageStatus.Completed)
@@ -128,7 +128,7 @@ else
     {
         var href = Navigation.Uri[(Navigation.BaseUri.Length - 1)..];
         return menu is { IsParent: true, MenuItems: not null } &&
-               menu.MenuItems.Any(x => !string.IsNullOrEmpty(x.Href) && x.Href.Equals(href));
+               menu.MenuItems.Any(x => !string.IsNullOrEmpty(x.Href) && href.Contains(x.Href));
     }
 
 }
