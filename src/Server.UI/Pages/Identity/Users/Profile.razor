@@ -1,6 +1,6 @@
 ﻿@page "/user/profile"
 
-@using CleanArchitecture.Blazor.Server.UI.Services.Fusion
+@using CleanArchitecture.Blazor.Application.Features.Fusion
 @using ResizeMode = SixLabors.ImageSharp.Processing.ResizeMode
 @using Size = SixLabors.ImageSharp.Size
 @using SixLabors.ImageSharp.Processing
@@ -221,8 +221,7 @@ else
         var state = await AuthState;
         _currentUserName = state.User.Identity?.Name??string.Empty;
         await UserProfileStateService.InitializeAsync(state.User.Identity?.Name??string.Empty);
-
-        model = Mapper.Map<ChangeUserProfileModel>(UserProfileStateService.UserProfile);
+        model = UserProfileMapper.ToChangeUserProfileModel(UserProfileStateService.UserProfile);
     }
 
     protected override void Dispose(bool disposing)

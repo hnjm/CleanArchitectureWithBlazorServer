@@ -13,10 +13,9 @@ public class ImportPicklistSetsCommand : ICacheInvalidatorRequest<Result>
         FileName = fileName;
         Data = data;
     }
-
     public string FileName { get; set; }
     public byte[] Data { get; set; }
-    public CancellationTokenSource? SharedExpiryTokenSource => PicklistSetCacheKey.GetOrCreateTokenSource();
+    public IEnumerable<string>? Tags => PicklistSetCacheKey.Tags;
 }
 
  
@@ -28,18 +27,15 @@ public class ImportPicklistSetsCommandHandler :
     private readonly IApplicationDbContext _context;
     private readonly IExcelService _excelService;
     private readonly IStringLocalizer<ImportPicklistSetsCommandHandler> _localizer;
-    private readonly IMapper _mapper;
 
     public ImportPicklistSetsCommandHandler(
         IApplicationDbContext context,
-        IMapper mapper,
         IExcelService excelService,
         IStringLocalizer<ImportPicklistSetsCommandHandler> localizer,
         IValidator<AddEditPicklistSetCommand> addValidator
     )
     {
         _context = context;
-        _mapper = mapper;
         _excelService = excelService;
         _localizer = localizer;
         _addValidator = addValidator;

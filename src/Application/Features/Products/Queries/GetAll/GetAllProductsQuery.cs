@@ -3,13 +3,14 @@
 
 using CleanArchitecture.Blazor.Application.Features.Products.Caching;
 using CleanArchitecture.Blazor.Application.Features.Products.DTOs;
+using CleanArchitecture.Blazor.Application.Features.Products.Mappers;
 
 namespace CleanArchitecture.Blazor.Application.Features.Products.Queries.GetAll;
 
 public class GetAllProductsQuery : ICacheableRequest<IEnumerable<ProductDto>>
 {
     public string CacheKey => ProductCacheKey.GetAllCacheKey;
-    public MemoryCacheEntryOptions? Options => ProductCacheKey.MemoryCacheEntryOptions;
+    public IEnumerable<string>? Tags => ProductCacheKey.Tags;
 }
 
 public class GetProductQuery : ICacheableRequest<ProductDto?>
@@ -17,7 +18,7 @@ public class GetProductQuery : ICacheableRequest<ProductDto?>
     public required int Id { get; set; }
 
     public string CacheKey => ProductCacheKey.GetProductByIdCacheKey(Id);
-    public MemoryCacheEntryOptions? Options => ProductCacheKey.MemoryCacheEntryOptions;
+    public IEnumerable<string>? Tags => ProductCacheKey.Tags;
 }
 
 public class GetAllProductsQueryHandler :
@@ -26,24 +27,18 @@ public class GetAllProductsQueryHandler :
 
 {
     private readonly IApplicationDbContext _context;
-    private readonly IStringLocalizer<GetAllProductsQueryHandler> _localizer;
-    private readonly IMapper _mapper;
 
     public GetAllProductsQueryHandler(
-        IApplicationDbContext context,
-        IMapper mapper,
-        IStringLocalizer<GetAllProductsQueryHandler> localizer
+        IApplicationDbContext context
     )
     {
         _context = context;
-        _mapper = mapper;
-        _localizer = localizer;
     }
 
     public async Task<IEnumerable<ProductDto>> Handle(GetAllProductsQuery request, CancellationToken cancellationToken)
     {
         var data = await _context.Products
-            .ProjectTo<ProductDto>(_mapper.ConfigurationProvider)
+            .ProjectTo()
             .ToListAsync(cancellationToken);
         return data;
     }
@@ -51,9 +46,8 @@ public class GetAllProductsQueryHandler :
     public async Task<ProductDto?> Handle(GetProductQuery request, CancellationToken cancellationToken)
     {
         var data = await _context.Products.Where(x => x.Id == request.Id)
-                       .ProjectTo<ProductDto>(_mapper.ConfigurationProvider)
+                       .ProjectTo()
                        .FirstOrDefaultAsync(cancellationToken);
-                 
         return data;
     }
 }

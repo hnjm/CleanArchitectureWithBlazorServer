@@ -1,4 +1,4 @@
-﻿namespace CleanArchitecture.Blazor.Server.UI.Constants;
+﻿namespace CleanArchitecture.Blazor.Server.UI.Themes;
 
 public static class Theme
 {
@@ -13,10 +13,10 @@ public static class Theme
                 Success = "#0CAD39", 
                 Info = "#4099f3", 
                 Warning = "#f0c42b", 
-                Error = "#dc3545",
+                Error = "rgba(244,67,54,1)",
                 ErrorContrastText = "#ffffff",
-                ErrorDarken = "#b02400",
-                ErrorLighten = "#ff5f4a",
+                ErrorDarken = "rgb(242,28,13)",
+                ErrorLighten = "rgb(246,96,85)",
                 Tertiary = "#20c997",
                 Black = "#111", 
                 White = "#ffffff", 
@@ -26,7 +26,7 @@ public static class Theme
                 Surface = "#ffffff", 
                 DrawerBackground = "#ffffff",
                 TextPrimary = "#2E2E2E", 
-                TextSecondary = "#76818c", 
+                TextSecondary = "#6c757d", 
                 SecondaryContrastText = "#F5F5F5", 
                 TextDisabled = "#B0B0B0", 
                 ActionDefault = "#80838b", 
@@ -47,9 +47,9 @@ public static class Theme
                 Success = "#0CAD39", 
                 Info = "#4099f3", 
                 Warning = "#f0c42b",
-                Error = "#dc3545",
+                Error = "#e02d48",
                 ErrorContrastText = "#ffffff",
-                ErrorDarken = "#a30000",
+                ErrorDarken = "#e02d48",
                 ErrorLighten = "#ff3333",
                 Tertiary = "#20c997",
                 Black = "#000000", 
@@ -79,113 +79,105 @@ public static class Theme
             },
             Typography = new Typography
             {
-                Default = new Default
+                Default = new DefaultTypography
                 {
                     FontSize = ".8125rem",
-                    FontWeight = 400,
-                    LineHeight = 1.4,
+                    FontWeight = "400",
+                    LineHeight = "1.4",
                     LetterSpacing = "normal",
-                    FontFamily = new[] { "Public Sans", "Roboto", "Arial", "sans-serif" }
+                    FontFamily = ["Public Sans", "Roboto", "Arial", "sans-serif"]
                 },
-                Input =new Input
+                H1 = new H1Typography
                 {
-                    FontSize = ".8125rem",
-                    FontWeight = 400,
-                    LineHeight = 1.5,
-                    LetterSpacing = "normal",
-                    FontFamily = new[] { "Public Sans", "Roboto", "Arial", "sans-serif" }
-                },
-                H1 = new H1
-                {
-                    FontSize = "3.5rem",
-                    FontWeight = 700,
-                    LineHeight = 1.167,
+                    FontSize = "2.2rem",
+                    FontWeight = "700",
+                    LineHeight = "2.8",
                     LetterSpacing = "-.01562em"
                 },
-                H2 = new H2
-                {
-                    FontSize = "3rem",
-                    FontWeight = 300,
-                    LineHeight = 1.2,
-                    LetterSpacing = "-.00833em"
-                },
-                H3 = new H3
+                H2 = new H2Typography
                 {
                     FontSize = "2rem",
-                    FontWeight = 600,
-                    LineHeight = 1.167,
+                    FontWeight = "600",
+                    LineHeight = "2.5",
+                    LetterSpacing = "-.00833em"
+                },
+                H3 = new H3Typography
+                {
+                    FontSize = "1.75rem",
+                    FontWeight = "600",
+                    LineHeight = "2.23",
                     LetterSpacing = "0"
                 },
-                H4 = new H4
+                H4 = new H4Typography
                 {
                     FontSize = "1.5rem",
-                    FontWeight = 400,
-                    LineHeight = 1.235,
+                    FontWeight = "500",
+                    LineHeight = "2",
                     LetterSpacing = ".00735em"
                 },
-                H5 = new H5
+                H5 = new H5Typography
                 {
                     FontSize = "1.25rem",
-                    FontWeight = 400,
-                    LineHeight = 1.3,
+                    FontWeight = "500",
+                    LineHeight = "1.8",
                     LetterSpacing = "0"
                 },
-                H6 = new H6
+                H6 = new H6Typography
                 {
-                    FontSize = "1.125rem",
-                    FontWeight = 600,
-                    LineHeight = 1.5,
+                    FontSize = "1rem",
+                    FontWeight = "400",
+                    LineHeight = "1.6",
                     LetterSpacing = ".0075em"
                 },
-                Button = new Button
+                Button = new ButtonTypography
                 {
                     FontSize = ".8125rem",
-                    FontWeight = 500,
-                    LineHeight = 1.75,
+                    FontWeight = "500",
+                    LineHeight = "1.75",
                     LetterSpacing = ".02857em",
                     TextTransform = "uppercase"
                 },
-                Subtitle1 = new Subtitle1
-                {
-                    FontSize = "1rem",
-                    FontWeight = 600,
-                    LineHeight = 1.75,
-                    LetterSpacing = ".00938em",
-                    TextTransform = "none"
-                },
-                Subtitle2 = new Subtitle2
+                Subtitle1 = new Subtitle1Typography
                 {
                     FontSize = ".875rem",
-                    FontWeight = 500,
-                    LineHeight = 1.57,
-                    LetterSpacing = ".00714em"
+                    FontWeight = "400",
+                    LineHeight = "1.5",
+                    LetterSpacing = "normal",
+                    FontFamily = ["Public Sans", "Roboto", "Arial", "sans-serif"]
                 },
-                Body1 = new Body1
-                {
-                    FontSize = "0.875rem",
-                    FontWeight = 400,
-                    LineHeight = 1.5,
-                    LetterSpacing = ".00938em"
-                },
-                Body2 = new Body2
+                Subtitle2 = new Subtitle2Typography
                 {
                     FontSize = ".8125rem",
-                    FontWeight = 400,
-                    LineHeight = 1.43,
+                    FontWeight = "500",
+                    LineHeight = "1.57",
+                    LetterSpacing = ".00714em"
+                },
+                Body1 = new Body1Typography
+                {
+                    FontSize = "0.8125rem",
+                    FontWeight = "400",
+                    LineHeight = "1.5",
+                    LetterSpacing = ".00938em"
+                },
+                Body2 = new Body2Typography
+                {
+                    FontSize = ".75rem",
+                    FontWeight = "300",
+                    LineHeight = "1.43",
                     LetterSpacing = ".01071em"
                 },
-                Caption = new Caption
+                Caption = new CaptionTypography
                 {
-                    FontSize = ".75rem",
-                    FontWeight = 400,
-                    LineHeight = 1.66,
+                    FontSize = "0.625rem",
+                    FontWeight = "400",
+                    LineHeight = "1.5",
                     LetterSpacing = ".03333em"
                 },
-                Overline = new Overline
+                Overline = new OverlineTypography
                 {
-                    FontSize = ".75rem",
-                    FontWeight = 400,
-                    LineHeight = 2.5,
+                    FontSize = "0.625rem",
+                    FontWeight = "300",
+                    LineHeight = "2",
                     LetterSpacing = ".08333em"
                 }
             },

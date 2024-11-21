@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using CleanArchitecture.Blazor.Application.Features.Documents.Caching;
@@ -11,11 +11,9 @@ public class GetFileStreamQuery : ICacheableRequest<(string, byte[])>
     {
         Id = id;
     }
-
     public int Id { get; set; }
-
     public string CacheKey => DocumentCacheKey.GetStreamByIdKey(Id);
-    public MemoryCacheEntryOptions? Options => DocumentCacheKey.MemoryCacheEntryOptions;
+    public IEnumerable<string>? Tags => DocumentCacheKey.Tags;
 }
 
 public class GetFileStreamQueryHandler : IRequestHandler<GetFileStreamQuery, (string, byte[])>

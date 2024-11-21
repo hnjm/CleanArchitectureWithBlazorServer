@@ -6,7 +6,7 @@
 [![Docker Image CI](https://github.com/neozhu/CleanArchitectureWithBlazorServer/actions/workflows/docker-image.yml/badge.svg)](https://github.com/neozhu/CleanArchitectureWithBlazorServer/actions/workflows/docker-image.yml)
 [![Nuget](https://img.shields.io/nuget/dt/CleanArchitecture.Blazor.Solution.Template?label=Downloads)](https://www.nuget.org/packages/CleanArchitecture.Blazor.Solution.Template)
 
-This repository hosts a Blazor Server application designed using Clean Architecture principles, featuring a sophisticated user interface and an efficient code generator. Blazor Server combines the power of C# with a modern web development experience, eliminating the need to switch between languages like JavaScript and C#. This setup not only simplifies development but also enables fast, responsive, and highly interactive web applications. Leveraging Blazor's real-time communication capabilities and .NET's robust ecosystem, developers can rapidly create feature-rich, scalable applications with a seamless user experience.
+This repository hosts a Blazor Server application designed using Clean Architecture principles, featuring a sophisticated user interface and an efficient code generator. The application is built on .NET 9, which brings enhanced performance, improved developer productivity, and new features that make the development process smoother. Blazor Server, now supported on .NET 9, combines the power of C# with a modern web development experience, eliminating the need to switch between languages like JavaScript and C#. This setup simplifies development and enables fast, responsive, and highly interactive web applications. Leveraging Blazor’s real-time communication capabilities and .NET’s robust ecosystem, developers can rapidly create feature-rich, scalable applications with a seamless user experience.
 
 ## Explore the Live Demo
 
@@ -49,10 +49,12 @@ Explore the application's features and design through screenshots and a video wa
 
 To get started with development, ensure you have the following tools and environments set up:
 
-- Microsoft Visual Studio Community 2022 (64-bit)
-- Docker
-- .NET 8.0
-- Unit Test Framework
+
+- [.NET 9.0 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/9.0)
+- [Microsoft Visual Studio 2022](https://visualstudio.microsoft.com/downloads/) or [Rider](https://www.jetbrains.com/rider/)
+- [Docker](https://www.docker.com/)
+
+
 
 
 ## Authentication Setup

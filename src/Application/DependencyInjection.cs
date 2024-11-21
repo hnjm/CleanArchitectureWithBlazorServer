@@ -5,6 +5,7 @@ using CleanArchitecture.Blazor.Application.Common.PublishStrategies;
 using CleanArchitecture.Blazor.Application.Pipeline;
 using CleanArchitecture.Blazor.Application.Pipeline.PreProcessors;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 namespace CleanArchitecture.Blazor.Application;
 
@@ -12,7 +13,6 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddApplication(this IServiceCollection services)
     {
-        services.AddAutoMapper(config => { config.AddMaps(Assembly.GetExecutingAssembly()); });
         services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
         services.AddTransient(typeof(IRequestExceptionHandler<,,>), typeof(DbExceptionHandler<,,>));
         services.AddMediatR(config =>
@@ -21,14 +21,15 @@ public static class DependencyInjection
             config.NotificationPublisher = new ParallelNoWaitPublisher();
             config.AddRequestPreProcessor(typeof(IRequestPreProcessor<>), typeof(ValidationPreProcessor<>));
             config.AddOpenBehavior(typeof(PerformanceBehaviour<,>));
-            config.AddOpenBehavior(typeof(MemoryCacheBehaviour<,>));
             config.AddOpenBehavior(typeof(FusionCacheBehaviour<,>));
             config.AddOpenBehavior(typeof(CacheInvalidationBehaviour<,>));
 
         });
-
-        services.AddLazyCache();
         services.AddScoped<UserProfileStateService>();
         return services;
+    }
+    public static void InitializeCacheFactory(this IHost host)
+    {
+        FusionCacheFactory.Configure(host.Services);
     }
 }

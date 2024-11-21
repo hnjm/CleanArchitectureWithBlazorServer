@@ -44,6 +44,16 @@ namespace CleanArchitecture.Blazor.Migrators.PostgreSQL.Migrations
                         .HasColumnType("timestamp without time zone")
                         .HasColumnName("date_time");
 
+                    b.Property<string>("DebugView")
+                        .HasMaxLength(2147483647)
+                        .HasColumnType("text")
+                        .HasColumnName("debug_view");
+
+                    b.Property<string>("ErrorMessage")
+                        .HasMaxLength(2147483647)
+                        .HasColumnType("text")
+                        .HasColumnName("error_message");
+
                     b.Property<string>("NewValues")
                         .HasColumnType("text")
                         .HasColumnName("new_values");
