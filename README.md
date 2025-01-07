@@ -16,6 +16,9 @@ Experience the application in action in Blazor Server mode by visiting:
 
 - PostgreSQL Database: [architecture.blazors.app](https://architecture.blazors.app/)
 
+### Additional Note:
+If you're also interested in exploring a version built with Blazor WebAssembly, it's now available! Please visit [CleanAspire Repository](https://github.com/neozhu/cleanaspire) for more details.
+[![](https://private-user-images.githubusercontent.com/1549611/386846455-013b167b-59fa-42d7-a2f7-ffec301c4e11.jpg?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3MzMyMDgzNzUsIm5iZiI6MTczMzIwODA3NSwicGF0aCI6Ii8xNTQ5NjExLzM4Njg0NjQ1NS0wMTNiMTY3Yi01OWZhLTQyZDctYTJmNy1mZmVjMzAxYzRlMTEuanBnP1gtQW16LUFsZ29yaXRobT1BV1M0LUhNQUMtU0hBMjU2JlgtQW16LUNyZWRlbnRpYWw9QUtJQVZDT0RZTFNBNTNQUUs0WkElMkYyMDI0MTIwMyUyRnVzLWVhc3QtMSUyRnMzJTJGYXdzNF9yZXF1ZXN0JlgtQW16LURhdGU9MjAyNDEyMDNUMDY0MTE1WiZYLUFtei1FeHBpcmVzPTMwMCZYLUFtei1TaWduYXR1cmU9N2U0MjZjYTYxZTEyYjljZjhlOWRlNWNhY2VjNmE3NTRkYjE3NmQzMDljZGYxZjdkMWY1MDhkNTUyYjg4ODA2MyZYLUFtei1TaWduZWRIZWFkZXJzPWhvc3QifQ.XGF7ccu4iG-spz7w2lUk8QcD_y0WVFR92xp-nCkbY34)](https://github.com/neozhu/cleanaspire)
 
 ## Projects Based on This Template
 
@@ -30,13 +33,6 @@ Here are some projects that have been developed based on this Clean Architecture
 2. **The DPP Application (EU Digital Product Passport)**
    - [Live Demo](https://materialpassport.blazorserver.com/)
 
-[![Visitor Management Screenshot](https://user-images.githubusercontent.com/1549611/183225025-96295845-add4-4b00-89d5-8d280a08c192.png)](https://visitor.blazorserver.com/)
-3. **Visitor Management**
-   - [GitHub Repository](https://github.com/neozhu/visitormanagement)
-
-[![School Bus Transport Management System Screenshot](https://github.com/user-attachments/assets/0874eb1d-ce6a-4bdc-b716-9fb7dbce2186)](https://schoolbus.blazorserver.com/)
-4. **School Bus Transport Management System**
-   - [GitHub Repository](https://github.com/neozhu/schoolbus)
 
 
 
@@ -186,7 +182,7 @@ Facebook.
 2. Change the setting `DBProvider` to the desired provider name (See Supported Databases).
 3. Change the `ConnectionString` to a connection string, which works for your selected database provider.
 
-## Docker compose https deployment
+## Docker Compose HTTPS Deployment
 
 - Create self-signed development certificates for the project
   -
@@ -216,7 +212,7 @@ The [CleanArchitecture CodeGenerator for Blazor App](https://github.com/neozhu/C
 
 ### Install CleanArchitecture CodeGenerator For Blazor App
 
-- Open Manage Extensions Search with `CleanArchitecture CodeGenerator For Blaozr App`
+- Open Manage Extensions Search with `CleanArchitecture CodeGenerator For Blazor App`
   ![image](https://github.com/neozhu/CleanArchitectureWithBlazorServer/assets/1549611/555d274c-8f62-438b-ac7a-6d327e4c23c8)
 - Download to Install
 
@@ -224,14 +220,14 @@ The [CleanArchitecture CodeGenerator for Blazor App](https://github.com/neozhu/C
 
 ## How to install solution templates
 
-- install the project template
+- Install the project template
     - run CLI: `dotnet new install ./`
     - run CLI: `dotnet new list`
 
 <img width="828" alt="image" src="https://github.com/neozhu/CleanArchitectureWithBlazorServer/assets/1549611/f23022e0-3fd6-475a-96ab-84b0d3328e4c">
 
 - create a solution with the template
-    - run CLI: `dotnet new ca-blazorserver-sln` or `dotnet new ca-blazorserver-sln -n NewProjectName(root namesapces)`
+    - run CLI: `dotnet new ca-blazorserver-sln` or `dotnet new ca-blazorserver-sln -n NewProjectName(root namespaces)`
 
 
 - build a project template with nuget.exe
@@ -241,11 +237,11 @@ The [CleanArchitecture CodeGenerator for Blazor App](https://github.com/neozhu/C
       <img width="769" alt="image" src="https://github.com/neozhu/CleanArchitectureWithBlazorServer/assets/1549611/ed7eb20f-aec2-4f69-95b7-d47c2eb20428">
 
 
-## Tutorial: Removing an cutomer Object from a Project
+## Tutorial: Removing a cutomer Object from a Project
 [![Everything Is AWESOME](doc/remove.png)](https://www.youtube.com/watch?v=i3p-3I95YqM "Everything Is AWESOME")
 
 
-## Tutorial: add an contact Entity in the project
+## Tutorial: Adding a contact Entity in the project
 [![Everything Is AWESOME](doc/create.png)](https://www.youtube.com/watch?v=X1b4hFLs4vo "Everything Is AWESOME")
 
 
@@ -253,12 +249,12 @@ The [CleanArchitecture CodeGenerator for Blazor App](https://github.com/neozhu/C
 
 I prefer Blazor Server because I dislike switching between C# and JavaScript during development. Blazor Server allows me to focus on C#.
 
-## Characteristic
+## Characteristics
 - Real-Time Updates
 - Avoid repeating work
 - Focus on story implementation
-- Integration Hangfire dashboard
-- Implementation OCR image recognition
+- Integration with the Hangfire dashboard
+- Implementation of OCR image recognition
 - org chart
 
 

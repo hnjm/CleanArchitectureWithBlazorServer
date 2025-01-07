@@ -14,7 +14,6 @@
              T="AuditTrailDto"
              FixedHeader="true"
              FixedFooter="true"
-             Virtualize="true"
              @bind-RowsPerPage="_defaultPageSize"
              Height="calc(100vh - 300px)"
              Loading="@_loading"
@@ -139,12 +138,6 @@
         <MudDataGridPager PageSizeOptions="@(new[] { 10, 15, 30, 50, 100, 500, 1000 })" />
     </PagerContent>
 </MudDataGrid>
-
-<style>
-    .mud-table-toolbar {
-        height: 120px !important;
-    }
-</style>
 
 @code
 {
