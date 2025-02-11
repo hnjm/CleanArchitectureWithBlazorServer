@@ -4,7 +4,7 @@ namespace CleanArchitecture.Blazor.Application.Features.AuditTrails.Specificatio
 
 public enum AuditTrailListView
 {
-    [Description("الكل")] [Display(Name="الكل")] All,
+    [Description("الكل")] All,
     [Description("My Change Histories")] My,
     [Description("Created Today")] TODAY,
     [Description("View of the last 30 days")] LAST_30_DAYS
