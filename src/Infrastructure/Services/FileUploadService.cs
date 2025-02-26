@@ -2,13 +2,17 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using CleanArchitecture.Blazor.Application.Common.Extensions;
+using CleanArchitecture.Blazor.Domain.Common.Enums;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Formats.Png;
+using SixLabors.ImageSharp.Processing;
 
 namespace CleanArchitecture.Blazor.Infrastructure.Services;
 
 /// <summary>
 /// Service for uploading files.
 /// </summary>
-public class UploadService : IUploadService
+public class FileUploadService : IUploadService
 {
     private static readonly string NumberPattern = " ({0})";
 
@@ -20,6 +24,16 @@ public class UploadService : IUploadService
     public async Task<string> UploadAsync(UploadRequest request)
     {
         if (request.Data == null || !request.Data.Any()) return string.Empty;
+
+        if (request.ResizeOptions != null)
+        {
+            using var inputStream = new MemoryStream(request.Data);
+            using var outputStream = new MemoryStream();
+            using var image = Image.Load(inputStream);
+            image.Mutate(i => i.Resize(request.ResizeOptions));
+            image.Save(outputStream, PngFormat.Instance);
+            request.Data = outputStream.ToArray();
+        }
 
         var folder = request.UploadType.GetDescription();
         var folderName = Path.Combine("Files", folder);
@@ -54,14 +68,16 @@ public class UploadService : IUploadService
     /// remove file
     /// </summary>
     /// <param name="filename"></param>
-    public void Remove(string filename)
+    public Task RemoveAsync(string filename)
     {
         var removefile = Path.Combine(Directory.GetCurrentDirectory(), filename);
         if (File.Exists(removefile))
         {
             File.Delete(removefile);
         }
+        return Task.CompletedTask;
     }
+     
     /// <summary>
     /// Gets the next available filename based on the given path.
     /// </summary>
