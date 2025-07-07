@@ -235,7 +235,7 @@
   <data name="No" xml:space="preserve">
     <value>아니요</value>
   </data>
-  <data name="No Allowed" xml:space="preserve">
+  <data name="Not Allowed" xml:space="preserve">
     <value>허용되지 않음</value>
   </data>
   <data name="OK" xml:space="preserve">
@@ -284,7 +284,7 @@
     <value>제출하다</value>
   </data>
   <data name="Update successfully" xml:space="preserve">
-    <value>업데이트가 성공적으로 완료되었습니다.</value>
+    <value>업데이트가 성공적으로 완료되었습니다</value>
   </data>
   <data name="Uploading..." xml:space="preserve">
     <value>업로드 중...</value>

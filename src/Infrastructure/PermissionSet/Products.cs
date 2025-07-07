@@ -5,31 +5,31 @@ namespace CleanArchitecture.Blazor.Infrastructure.PermissionSet;
 public static partial class Permissions
 {
     [DisplayName("Product Permissions")]
-    [Description("Set permissions for product operations.")]
+    [Description("Set permissions for product operations")]
     public static class Products
     {
-        [Description("Allows viewing product details.")]
+        [Description("Allows viewing product details")]
         public const string View = "Permissions.Products.View";
 
-        [Description("Allows creating new product records.")]
+        [Description("Allows creating new product records")]
         public const string Create = "Permissions.Products.Create";
 
-        [Description("Allows modifying existing product details.")]
+        [Description("Allows modifying existing product details")]
         public const string Edit = "Permissions.Products.Edit";
 
-        [Description("Allows deleting product records.")]
+        [Description("Allows deleting product records")]
         public const string Delete = "Permissions.Products.Delete";
 
-        [Description("Allows printing product details.")]
+        [Description("Allows printing product details")]
         public const string Print = "Permissions.Products.Print";
 
-        [Description("Allows searching for product records.")]
+        [Description("Allows searching for product records")]
         public const string Search = "Permissions.Products.Search";
 
-        [Description("Allows exporting product records.")]
+        [Description("Allows exporting product records")]
         public const string Export = "Permissions.Products.Export";
 
-        [Description("Allows importing product records.")]
+        [Description("Allows importing product records")]
         public const string Import = "Permissions.Products.Import";
     }
 }

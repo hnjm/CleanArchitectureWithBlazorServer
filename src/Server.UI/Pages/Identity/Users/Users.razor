@@ -4,6 +4,7 @@
 @using CleanArchitecture.Blazor.Application.Features.Identity.Notifications.UserActivation
 @using CleanArchitecture.Blazor.Infrastructure.Persistence
 @using CleanArchitecture.Blazor.Infrastructure.Services.MultiTenant
+@using CleanArchitecture.Blazor.Server.UI.Services.Identity
 @using CleanArchitecture.Blazor.Server.UI.Components.UtcToLocalTime
 @using Microsoft.AspNetCore.WebUtilities
 @using CleanArchitecture.Blazor.Domain.Identity
@@ -132,7 +133,7 @@
                 @if (_accessRights.Edit || _accessRights.Delete || _accessRights.ManageRoles ||
                                 _accessRights.RestPassword || _accessRights.SendRestPasswordMail || _accessRights.ManagePermissions)
                 {
-                    <MudMenu Icon="@Icons.Material.Filled.Edit" Variant="Variant.Filled" Size="Size.Small"
+                    <MudMenu Icon="@Icons.Material.Filled.Edit" Variant="Variant.Outlined" Size="Size.Small"
                              Dense="true"
                              EndIcon="@Icons.Material.Filled.KeyboardArrowDown" IconColor="Color.Info" AnchorOrigin="Origin.CenterLeft">
                         @if (_accessRights.Edit)
@@ -159,7 +160,7 @@
                 }
                 else
                 {
-                    <MudButton Variant="Variant.Filled"
+                    <MudButton Variant="Variant.Outlined"
                                StartIcon="@Icons.Material.Filled.DoNotTouch" IconColor="Color.Secondary" Size="Size.Small"
                                Color="Color.Surface">
                         @ConstantString.NoAllowed
@@ -180,13 +181,6 @@
                 <UserCard Item="@context.Item" OnSendVerify="SendVerificationEmail" DisplayOnlineStatus="@_canViewOnlineStatus"></UserCard>
             </CellTemplate>
         </PropertyColumn>
-        <PropertyColumn Property="x => x.Email" Title="@Localizer["Full Name"]">
-            <CellTemplate>
-                <div class="d-flex flex-column">
-                    <MudText Typo="Typo.body2">@context.Item.DisplayName</MudText>
-                </div>
-            </CellTemplate>
-        </PropertyColumn>
         <PropertyColumn Property="x => x.Superior" Title="@Localizer[_currentUserDto.GetMemberDescription(x => x.Superior)]">
             <CellTemplate>
                 @context.Item.Superior?.UserName
@@ -199,7 +193,7 @@
                 {
                     foreach (var role in context.Item.AssignedRoles)
                     {
-                        <MudChip Size="Size.Small" Variant="Variant.Text">@role</MudChip>
+                        <MudChip Size="Size.Small" Variant="Variant.Outlined">@role</MudChip>
                     }
                 }
             </CellTemplate>
@@ -209,14 +203,14 @@
                 <div>
                     @if (!context.Item.IsActive || (context.Item.LockoutEnd is not null && context.Item.LockoutEnd > DateTime.UtcNow))
                     {
-                        <MudTooltip Text="@Localizer["Click to change status to active."]" Delay="300">
-                            <MudSwitch T="bool" Value="context.Item.IsActive" ValueChanged="@(() => ToggleUserActiveStatusAsync(context.Item))" ThumbIcon="@Icons.Material.Filled.Close" ThumbIconColor="Color.Error" />
+                        <MudTooltip Text="@Localizer["Click to change status to active"]" Delay="300">
+                            <MudCheckBox T="bool" Color="Color.Error" Value="context.Item.IsActive" ValueChanged="@(() => ToggleUserActiveStatusAsync(context.Item))" />
                         </MudTooltip>
                     }
                     else
                     {
-                        <MudTooltip Text="@Localizer["Click to change status to inactive."]" Delay="300">
-                            <MudSwitch T="bool" Value="context.Item.IsActive" ValueChanged="@(() => ToggleUserActiveStatusAsync(context.Item))" ThumbIcon="@Icons.Material.Filled.Done" ThumbIconColor="Color.Success" />
+                        <MudTooltip Text="@Localizer["Click to change status to inactive"]" Delay="300">
+                            <MudCheckBox T="bool" Color="Color.Success" Value="context.Item.IsActive" ValueChanged="@(() => ToggleUserActiveStatusAsync(context.Item))" />
                         </MudTooltip>
                     }
                 </div>
@@ -246,6 +240,7 @@
     private UserManager<ApplicationUser> _userManager = null!;
     private RoleManager<ApplicationRole> _roleManager = null!;
     private PermissionHelper _permissionHelper = null!;
+    private UserPermissionAssignmentService _permissionAssignmentService = null!;
 
     // Page state and data
     private int _defaultPageSize = 15;
@@ -290,6 +285,7 @@
         _roleManager = ScopedServices.GetRequiredService<RoleManager<ApplicationRole>>();
         _userManager = ScopedServices.GetRequiredService<UserManager<ApplicationUser>>();
         _permissionHelper = ScopedServices.GetRequiredService<PermissionHelper>();
+        _permissionAssignmentService = ScopedServices.GetRequiredService<UserPermissionAssignmentService>();
     }
 
     public void Dispose()
@@ -416,7 +412,7 @@
             return;
         }
 
-        Snackbar.Add(Localizer["New user created successfully."], Severity.Info);
+        Snackbar.Add(Localizer["New user created successfully"], Severity.Info);
         await AssignRolesToUserAsync(newUser, model.AssignedRoles);
         Logger.LogInformation("User created: {UserName} (ID: {UserId})", newUser.UserName, newUser.Id);
         UserService.Refresh();
@@ -453,7 +449,7 @@
             {
                 await _userManager.AddToRolesAsync(user, model.AssignedRoles);
             }
-            Snackbar.Add(Localizer["User updated successfully."], Severity.Info);
+            Snackbar.Add(Localizer["User updated successfully"], Severity.Info);
             await RefreshDataGrid();
             UserService.Refresh();
             await OnlineUserTracker.Update(model.Id, model.UserName, model.DisplayName ?? string.Empty, model.ProfilePictureDataUrl ?? string.Empty);
@@ -575,7 +571,7 @@
             Navigation.ToAbsoluteUri(ConfirmEmail.PageUrl).AbsoluteUri,
             new Dictionary<string, object?> { ["userId"] = model.Id, ["code"] = code, ["returnUrl"] = "/" });
         await Mediator.Publish(new UserActivationNotification(callbackUrl, model.Email, model.Id, model.UserName));
-        Snackbar.Add(string.Format(Localizer["Verification email sent to {0}."], model.Email), Severity.Info);
+        Snackbar.Add(string.Format(Localizer["Verification email sent to {0}"], model.Email), Severity.Info);
         Logger.LogInformation("Verification email sent to {UserName} (ID: {UserId})", model.UserName, model.Id);
     }
 
@@ -589,7 +585,7 @@
             Navigation.ToAbsoluteUri(ResetPassword.PageUrl).AbsoluteUri,
             new Dictionary<string, object?> { ["userId"] = user.Id, ["token"] = code });
         await Mediator.Publish(new ResetPasswordNotification(callbackUrl, model.Email, model.UserName));
-        Snackbar.Add(string.Format(Localizer["A new password for {0} has been sent via email. The user will be required to change it upon first login."], model.UserName), Severity.Info);
+        Snackbar.Add(string.Format(Localizer["A new password for {0} has been sent via email. The user will be required to change it upon first login"], model.UserName), Severity.Info);
     }
 
     private async Task ResetPasswordDialog(ApplicationUserDto model)
@@ -618,7 +614,7 @@
                 user.EmailConfirmed = true;
                 await _userManager.UpdateAsync(user);
             }
-            Snackbar.Add(Localizer["Reset password successfully."], Severity.Info);
+            Snackbar.Add(Localizer["Reset password successfully"], Severity.Info);
         }
         else
         {
@@ -644,12 +640,14 @@
     {
         user.IsActive = true;
         user.LockoutEnd = null;
+        user.LastModified = DateTime.UtcNow;
+        user.LastModifiedBy = UserProfile?.UserId;
         var result = await _userManager.UpdateAsync(user);
         if (result.Succeeded)
         {
             model.IsActive = true;
             model.LockoutEnd = null;
-            Snackbar.Add(Localizer["The user has been activated."], Severity.Info);
+            Snackbar.Add(Localizer["The user has been activated"], Severity.Info);
         }
         else
         {
@@ -661,12 +659,14 @@
     {
         user.IsActive = false;
         user.LockoutEnd = DateTimeOffset.MaxValue;
+        user.LastModified = DateTime.UtcNow;
+        user.LastModifiedBy = UserProfile?.UserId;
         var result = await _userManager.UpdateAsync(user);
         if (result.Succeeded)
         {
             model.IsActive = false;
             model.LockoutEnd = DateTimeOffset.MaxValue;
-            Snackbar.Add(Localizer["The user has been inactivated."], Severity.Info);
+            Snackbar.Add(Localizer["The user has been inactivated"], Severity.Info);
         }
         else
         {
@@ -677,7 +677,7 @@
     private async Task OpenPermissionsDrawerAsync(ApplicationUserDto model)
     {
         _showPermissionsDrawer = true;
-        _permissions = await _permissionHelper.GetAllPermissionsByUserId(model.Id);
+        _permissions = await _permissionAssignmentService.LoadAsync(model.Id);
     }
 
     private Task HandlePermissionsDrawerOpenChanged(bool state)
@@ -691,15 +691,8 @@
         _isProcessing = true;
         try
         {
-            var userId = models.First().UserId;
-            var user = await _userManager.FindByIdAsync(userId!)
-                       ?? throw new NotFoundException($"User not found: {userId}");
-            foreach (var model in models)
-            {
-                await UpdateUserPermissionAsync(user, model);
-            }
-            Snackbar.Add(Localizer["Authorization has been changed."], Severity.Info);
-            await ClearUserClaimsCacheAsync(user.Id);
+            await _permissionAssignmentService.AssignBulkAsync(models);
+            Snackbar.Add(Localizer["Authorization has been changed"], Severity.Info);
         }
         finally
         {
@@ -707,53 +700,14 @@
         }
     }
 
-    private async Task UpdateUserPermissionAsync(ApplicationUser user, PermissionModel model)
-    {
-        if (model.Assigned)
-        {
-            if (!string.IsNullOrEmpty(model.ClaimType) && !string.IsNullOrEmpty(model.ClaimValue))
-                await _userManager.AddClaimAsync(user, new Claim(model.ClaimType, model.ClaimValue));
-        }
-        else
-        {
-            var existingClaim = (await _userManager.GetClaimsAsync(user)).FirstOrDefault(c => c.Value == model.ClaimValue);
-            if (existingClaim is not null)
-                await _userManager.RemoveClaimAsync(user, existingClaim);
-        }
-    }
-
-    private async Task ClearUserClaimsCacheAsync(string userId)
-    {
-        var cacheKey = $"get-claims-by-{userId}";
-        FusionCache.Remove(cacheKey);
-        await Task.Delay(300);
-    }
-
     private async Task HandlePermissionChangedAsync(PermissionModel model)
     {
         _isProcessing = true;
         try
         {
-            var userId = model.UserId!;
-            var user = await _userManager.FindByIdAsync(userId)
-                       ?? throw new NotFoundException($"User not found: {userId}");
             model.Assigned = !model.Assigned;
-            if (model.Assigned)
-            {
-                if (!string.IsNullOrEmpty(model.ClaimType) && !string.IsNullOrEmpty(model.ClaimValue))
-                {
-                    await _userManager.AddClaimAsync(user, new Claim(model.ClaimType, model.ClaimValue));
-                    Snackbar.Add(Localizer["Permission assigned successfully."], Severity.Info);
-                }
-            }
-            else
-            {
-                var existingClaim = (await _userManager.GetClaimsAsync(user)).FirstOrDefault(c => c.Value == model.ClaimValue);
-                if (existingClaim is not null)
-                    await _userManager.RemoveClaimAsync(user, existingClaim);
-                Snackbar.Add(Localizer["Permission removed successfully."], Severity.Info);
-            }
-            await ClearUserClaimsCacheAsync(user.Id);
+            await _permissionAssignmentService.AssignAsync(model);
+            Snackbar.Add(model.Assigned ? Localizer["Permission assigned successfully"] : Localizer["Permission removed successfully"], Severity.Info);
         }
         finally
         {
