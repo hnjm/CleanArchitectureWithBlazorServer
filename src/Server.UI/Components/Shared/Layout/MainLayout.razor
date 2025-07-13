@@ -40,16 +40,23 @@
         await LayoutService.ApplyUserPreferences(_defaultDarkMode);
     }
 
-    protected override Task OnInitializedAsync()
+    protected override async Task OnInitializedAsync()
     {
         LayoutService.MajorUpdateOccurred += LayoutServiceOnMajorUpdateOccurred;
-        LayoutService.SetBaseTheme(Theme.ApplicationTheme());
-        return base.OnInitializedAsync();
+        await  LayoutService.SetBaseTheme(Theme.ApplicationTheme());
+         
     }
 
-    private void LayoutServiceOnMajorUpdateOccurred(object? sender, EventArgs e)
+    private async Task LayoutServiceOnMajorUpdateOccurred()
     {
-        InvokeAsync(() => StateHasChanged());
+      
+        if (LayoutService.DarkModeToggle == Services.UserPreferences.DarkLightMode.System && _mudThemeProvider!=null)
+        {
+            _defaultDarkMode = await _mudThemeProvider.GetSystemDarkModeAsync();
+            await LayoutService.ApplyUserPreferences(_defaultDarkMode);
+            
+        }
+       await InvokeAsync(()=> StateHasChanged());
     }
 
 }

@@ -48,7 +48,7 @@ public class LayoutService
         UpdateLayoutSettings(_systemPreferences);
         UpdateCurrentTheme();
         await _userPreferencesService.SaveUserPreferences(UserPreferences).ConfigureAwait(false);
-        OnMajorUpdateOccurred();
+        await OnMajorUpdateOccurred();
     }
 
     /// <summary>
@@ -77,8 +77,6 @@ public class LayoutService
         CurrentTheme.PaletteDark.Primary = UserPreferences.DarkPrimaryColor;
         CurrentTheme.PaletteLight.PrimaryDarken = UserPreferences.PrimaryDarken;
         CurrentTheme.PaletteLight.PrimaryLighten = UserPreferences.PrimaryLighten;
-        CurrentTheme.PaletteDark.PrimaryDarken = UserPreferences.PrimaryDarken;
-        CurrentTheme.PaletteDark.PrimaryLighten = UserPreferences.PrimaryLighten;
 
         // Update layout properties
         CurrentTheme.LayoutProperties.DefaultBorderRadius = UserPreferences.BorderRadius + "px";
@@ -116,7 +114,7 @@ public class LayoutService
 
         // Subtitles
         CurrentTheme.Typography.Subtitle1.FontSize = FormatFontSize(UserPreferences.Subtitle1FontSize);
-        CurrentTheme.Typography.Subtitle2.FontSize = FormatFontSize(UserPreferences.Subtitle2FontSize); ;
+        CurrentTheme.Typography.Subtitle2.FontSize = FormatFontSize(UserPreferences.Subtitle2FontSize); 
     }
 
     /// <summary>
@@ -127,27 +125,37 @@ public class LayoutService
 
     #region Events and System Preferences
 
-    public event EventHandler? MajorUpdateOccurred;
+    public event Func<Task>? MajorUpdateOccurred;
 
     /// <summary>
     /// Raises the MajorUpdateOccurred event.
     /// </summary>
-    private void OnMajorUpdateOccurred() =>
-        MajorUpdateOccurred?.Invoke(this, EventArgs.Empty);
+    private async Task OnMajorUpdateOccurred()
+    {
+        if (MajorUpdateOccurred is not null)
+        {
+            var handlers = MajorUpdateOccurred.GetInvocationList();
+            foreach (Func<Task> handler in handlers)
+            {
+                await handler();
+            }
+        }
+        }
+       
 
     /// <summary>
     /// Handles system preference changes (e.g., system dark mode).
     /// Updates IsDarkMode based on the new value and notifies subscribers.
     /// </summary>
-    public Task OnSystemPreferenceChanged(bool newValue)
+    public async Task OnSystemPreferenceChanged(bool newValue)
     {
         _systemPreferences = newValue;
         if (DarkModeToggle == DarkLightMode.System)
         {
             IsDarkMode = newValue;
-            OnMajorUpdateOccurred();
+            await OnMajorUpdateOccurred();
         }
-        return Task.CompletedTask;
+        
     }
 
     #endregion
@@ -177,7 +185,7 @@ public class LayoutService
         }
         UserPreferences.DarkLightTheme = DarkModeToggle;
         await _userPreferencesService.SaveUserPreferences(UserPreferences).ConfigureAwait(false);
-        OnMajorUpdateOccurred();
+        await  OnMajorUpdateOccurred();
     }
 
     /// <summary>
@@ -189,7 +197,7 @@ public class LayoutService
         IsRTL = !IsRTL;
         UserPreferences.RightToLeft = IsRTL;
         await _userPreferencesService.SaveUserPreferences(UserPreferences).ConfigureAwait(false);
-        OnMajorUpdateOccurred();
+        await  OnMajorUpdateOccurred();
     }
 
     /// <summary>
@@ -213,10 +221,10 @@ public class LayoutService
     /// <summary>
     /// Sets the base theme and notifies subscribers.
     /// </summary>
-    public void SetBaseTheme(MudTheme theme)
+    public async Task SetBaseTheme(MudTheme theme)
     {
         CurrentTheme = theme;
-        OnMajorUpdateOccurred();
+        await OnMajorUpdateOccurred();
     }
 
     /// <summary>
@@ -228,7 +236,7 @@ public class LayoutService
         CurrentTheme.PaletteDark.Secondary = color;
         UserPreferences.SecondaryColor = color;
         await _userPreferencesService.SaveUserPreferences(UserPreferences).ConfigureAwait(false);
-        OnMajorUpdateOccurred();
+        await OnMajorUpdateOccurred();
     }
 
     /// <summary>
@@ -239,7 +247,7 @@ public class LayoutService
         CurrentTheme.LayoutProperties.DefaultBorderRadius = size + "px";
         UserPreferences.BorderRadius = size;
         await _userPreferencesService.SaveUserPreferences(UserPreferences).ConfigureAwait(false);
-        OnMajorUpdateOccurred();
+       await  OnMajorUpdateOccurred();
     }
 
     #endregion

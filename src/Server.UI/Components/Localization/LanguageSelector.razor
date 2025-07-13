@@ -3,7 +3,6 @@
 
 @inject IOptions<RequestLocalizationOptions> LocalizationOptions
 @inject LayoutService LayoutService
-@inject IStringLocalizer<HeaderMenu> L
 <MudTooltip Text="@CurrentLanguage">
     <MudMenu AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight" Class="mx-1" Icon="@Icons.Material.Outlined.Translate" Color="Color.Default" Dense="true">
         @if (SupportedLanguages is not null)
@@ -12,7 +11,7 @@
             {
                 if (language.Name == CurrentLanguage)
                 {
-                    <MudMenuItem style="background:var(--mud-palette-primary); color:#FFF !important">@language.DisplayName</MudMenuItem>
+                    <MudMenuItem Icon="@Icons.Material.Filled.Check">@language.DisplayName</MudMenuItem>
                 }
                 else
                 {

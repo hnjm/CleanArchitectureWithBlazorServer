@@ -46,7 +46,7 @@ public static class DependencyInjection
     private const string SMTP_CLIENT_OPTIONS_DEFAULT_FROM_EMAIL = "SmtpClientOptions:DefaultFromEmail";
     private const string EMAIL_TEMPLATES_PATH = "Resources/EmailTemplates";
     private const string DEFAULT_FROM_EMAIL = "noreply@blazorserver.com";
-    private const string LOGIN_PATH = "/pages/authentication/login";
+    private const string LOGIN_PATH = "/account/login";
     private const int DEFAULT_LOCKOUT_TIME_SPAN_MINUTES = 5;
     private const int MAX_FAILED_ACCESS_ATTEMPTS = 5;
 
@@ -55,7 +55,7 @@ public static class DependencyInjection
     {
         services.AddSettings(configuration)
             .AddDatabase(configuration)
-            .AddServices()
+            .AddServices(configuration)
             .AddMessageServices(configuration);
 
         services
@@ -165,7 +165,7 @@ public static class DependencyInjection
         }
     }
 
-    private static IServiceCollection AddServices(this IServiceCollection services)
+    private static IServiceCollection AddServices(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddSingleton<PicklistService>()
             .AddSingleton<IPicklistService>(sp =>
@@ -209,6 +209,9 @@ public static class DependencyInjection
 
         // Add other services
         services.AddScoped<IGeolocationService, GeolocationService>();
+        
+        // Configure SecurityAnalysisService with options
+        services.Configure<SecurityAnalysisOptions>(configuration.GetSection(SecurityAnalysisOptions.SectionName));
         services.AddScoped<ISecurityAnalysisService, SecurityAnalysisService>();
 
         return services
