@@ -10,20 +10,20 @@ namespace CleanArchitecture.Blazor.Infrastructure.Persistence.Interceptors;
 /// </summary>
 public class AuditableEntityInterceptor : SaveChangesInterceptor
 {
-    private readonly ICurrentUserAccessor _currentUserAccessor;
-    private readonly IDbContextFactory<ApplicationDbContext> _dbContextFactory;
+    private readonly IUserContextAccessor _userContextAccessor;
+    private readonly IServiceProvider _serviceProvider;
     private readonly IDateTime _dateTime;
     private List<AuditTrail> _temporaryAuditTrailList = new();
 
     /// <summary>
     /// Initializes a new instance of the <see cref="AuditableEntityInterceptor"/> class.
     /// </summary>
-    /// <param name="currentUserService">The current user service.</param>
+    /// <param name="serviceProvider">The service provider for resolving scoped services.</param>
     /// <param name="dateTime">The date and time service.</param>
     public AuditableEntityInterceptor(IServiceProvider serviceProvider, IDateTime dateTime)
     {
-        _currentUserAccessor = serviceProvider.GetRequiredService<ICurrentUserAccessor>();
-        _dbContextFactory= serviceProvider.GetRequiredService<IDbContextFactory<ApplicationDbContext>>();
+        _userContextAccessor = serviceProvider.GetRequiredService<IUserContextAccessor>();
+        _serviceProvider = serviceProvider;
         _dateTime = dateTime;
     }
 
@@ -71,8 +71,9 @@ public class AuditableEntityInterceptor : SaveChangesInterceptor
     }
     private void UpdateAuditableEntities(DbContext context)
     {
-        var userId = _currentUserAccessor.SessionInfo?.UserId;
-        var tenantId = _currentUserAccessor.SessionInfo?.TenantId;
+        var currentUser = _userContextAccessor.Current;
+        var userId = currentUser?.UserId;
+        var tenantId = currentUser?.TenantId;
         var now = _dateTime.Now;
 
         foreach (var entry in context.ChangeTracker.Entries<IAuditableEntity>())
@@ -124,7 +125,8 @@ public class AuditableEntityInterceptor : SaveChangesInterceptor
 
     private List<AuditTrail> GenerateAuditTrails(DbContext context)
     {
-        var userId = _currentUserAccessor.SessionInfo?.UserId;
+        var currentUser = _userContextAccessor.Current;
+        var userId = currentUser?.UserId;
         var now = _dateTime.Now;
         var auditTrails = new List<AuditTrail>();
 
@@ -239,7 +241,10 @@ public class AuditableEntityInterceptor : SaveChangesInterceptor
                     }
                 }
             }
-            var dbcontext = _dbContextFactory.CreateDbContext();
+            // 使用 IServiceProvider 创建 scope 并获取 IDbContextFactory<ApplicationDbContext>
+            using var scope = _serviceProvider.CreateScope();
+            var dbContextFactory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<ApplicationDbContext>>();
+            var dbcontext = dbContextFactory.CreateDbContext();
             await dbcontext.AddRangeAsync(auditTrails, cancellationToken);
             await dbcontext.SaveChangesAsync(cancellationToken);
 

@@ -1,10 +1,8 @@
 ﻿using System.Security.Claims;
 using System.Text.Json;
 using CleanArchitecture.Blazor.Domain.Identity;
-using CleanArchitecture.Blazor.Infrastructure.Constants.Role;
-using CleanArchitecture.Blazor.Infrastructure.Constants.User;
+using CleanArchitecture.Blazor.Application.Common.Constants.Roles;
 using CleanArchitecture.Blazor.Server.UI.Pages.Identity.Login;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Identity;
@@ -143,14 +141,14 @@ internal static class IdentityComponentsEndpointRouteBuilderExtensions
         var accountGroup = endpoints.MapGroup("/pages/authentication");
 
         // Configure login endpoint with credential-based authentication
-        accountGroup.MapGet("login", async (
+        accountGroup.MapPost("login", async (
             HttpContext context,
             [FromServices] SignInManager<ApplicationUser> signInManager,
             [FromServices] UserManager<ApplicationUser> userManager,
-            [FromQuery] string userName,
-            [FromQuery] string password,
-            [FromQuery] bool rememberMe = false,
-            [FromQuery] string? returnUrl = null) =>
+            [FromForm] string? userName=null,
+            [FromForm] string? password=null,
+            [FromForm] bool rememberMe = false,
+            [FromForm] string? returnUrl = null) =>
         {
             try
             {
@@ -200,8 +198,8 @@ internal static class IdentityComponentsEndpointRouteBuilderExtensions
         // Configure two-factor authentication verification endpoint
         accountGroup.MapGet("2fa/verify", async (HttpContext context,
             [FromServices] SignInManager<ApplicationUser> signInManager,
-            [FromQuery] string token,
-            [FromQuery] bool remember,
+            [FromQuery] string? token=null,
+            [FromQuery] bool remember=false,
             [FromQuery] string? returnUrl = null
             ) =>
         {
@@ -232,7 +230,7 @@ internal static class IdentityComponentsEndpointRouteBuilderExtensions
         // Configure two-factor authentication recovery code endpoint
         accountGroup.MapGet("2fa/recovery", async (HttpContext context,
             [FromServices] SignInManager<ApplicationUser> signInManager,
-            [FromQuery] string recoveryCode,
+            [FromQuery] string? recoveryCode=null,
             [FromQuery] string? returnUrl = null) =>
         {
             // Security validation for request origin
@@ -263,8 +261,8 @@ internal static class IdentityComponentsEndpointRouteBuilderExtensions
         accountGroup.MapPost("/performexternallogin", (
             HttpContext context,
             [FromServices] SignInManager<ApplicationUser> signInManager,
-            [FromForm] string provider,
-            [FromForm] string returnUrl) =>
+            [FromForm] string? provider=null,
+            [FromForm] string? returnUrl=null) =>
         {
             // Build query parameters for external login callback
             IEnumerable<KeyValuePair<string, StringValues>> query =
@@ -289,9 +287,9 @@ internal static class IdentityComponentsEndpointRouteBuilderExtensions
         accountGroup.MapGet("externallogin", async (
             HttpContext context,
             [FromServices] SignInManager<ApplicationUser> signInManager,
-            [FromQuery] string action,
-            [FromQuery] string? remoteError,
-            [FromQuery] string? returnUrl) =>
+            [FromQuery] string? action=null,
+            [FromQuery] string? remoteError=null,
+            [FromQuery] string? returnUrl=null) =>
         {
             // Handle errors from external provider
             if (!string.IsNullOrEmpty(remoteError))
@@ -360,10 +358,10 @@ internal static class IdentityComponentsEndpointRouteBuilderExtensions
            [FromServices] SignInManager<ApplicationUser> signInManager,
            [FromServices] RoleManager<ApplicationRole> roleManager,
            [FromServices] UserManager<ApplicationUser> userManager,
-           [FromQuery] string action,
-           [FromQuery] string tenantId,
-           [FromQuery] string timezoneId,
-           [FromQuery] string languageCode) =>
+           [FromQuery] string? action,
+           [FromQuery] string? tenantId,
+           [FromQuery] string? timezoneId,
+           [FromQuery] string? languageCode) =>
         {
             // Retrieve external login information for account linking
             var info = await signInManager.GetExternalLoginInfoAsync();
@@ -372,7 +370,10 @@ internal static class IdentityComponentsEndpointRouteBuilderExtensions
                 logger.LogWarning("No external login info found for linking.");
                 return Results.BadRequest("No external login info found for linking.");
             }
-            
+            if (string.IsNullOrEmpty(tenantId) || string.IsNullOrEmpty(timezoneId) || string.IsNullOrEmpty(languageCode))
+            {
+                return Results.BadRequest("Tenant ID, timezone ID, and language code are required for linking external login.");
+            }
             // Create new user account with external provider information
             var user = new ApplicationUser()
             {

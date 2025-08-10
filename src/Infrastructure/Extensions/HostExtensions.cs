@@ -1,8 +1,13 @@
-﻿using Microsoft.Extensions.Hosting;
+﻿using CleanArchitecture.Blazor.Application.Common.FusionCache;
+using Microsoft.Extensions.Hosting;
 
 namespace CleanArchitecture.Blazor.Infrastructure.Extensions;
 public static class HostExtensions
 {
+    public static void InitializeCacheFactory(this IHost host)
+    {
+        FusionCacheFactory.Configure(host.Services);
+    }
     public static async Task InitializeDatabaseAsync(this IHost host)
     {
         using (var scope = host.Services.CreateScope())
@@ -17,4 +22,6 @@ public static class HostExtensions
             }
         }
     }
+
+   
 }

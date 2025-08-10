@@ -1,115 +1,189 @@
 ﻿using EntityFramework.Exceptions.Common;
+using System.Collections.Concurrent;
 
 namespace CleanArchitecture.Blazor.Application.Common.ExceptionHandlers;
 
 /// <summary>
 /// Handles database update exceptions and converts them into Result or Result&lt;T&gt; responses.
+/// Provides user-friendly error messages for various database constraint violations.
 /// </summary>
-public class DbExceptionHandler<TRequest, TResponse, TException> : IRequestExceptionHandler<TRequest, TResponse, TException>
-    where TRequest : IRequest<Result>
-    where TResponse : Result
+public sealed class DbExceptionHandler<TRequest, TResponse, TException> :
+    IRequestExceptionHandler<TRequest, TResponse, TException>
+    where TRequest : IRequest<TResponse>
+    where TResponse : IResult
     where TException : DbUpdateException
 {
-    private readonly ILogger _logger;
-    private readonly ILoggerFactory _loggerFactory;
+    // Cache compiled factories per TResponse type to avoid repeated reflection
+    private static readonly ConcurrentDictionary<Type, Func<string[], object>> FailureFactoryCache = new();
 
-    public DbExceptionHandler(ILoggerFactory loggerFactory)
-    {
-        _loggerFactory = loggerFactory;
-        _logger = _loggerFactory.CreateLogger(nameof(DbExceptionHandler<TRequest, TResponse, TException>));
-    }
-
-    public Task Handle(TRequest request, TException exception, RequestExceptionHandlerState<TResponse> state,
+    // Common constraint-name prefixes to strip
+    private static readonly string[] ConstraintPrefixes = ["PK_", "FK_", "IX_", "UQ_", "UC_"];
+    public Task Handle(
+        TRequest request,
+        TException exception,
+        RequestExceptionHandlerState<TResponse> state,
         CancellationToken cancellationToken)
     {
-        var errors = GetErrors(exception);
+        var errors = GetUserFriendlyErrors(exception);
+        var failureResult = CreateFailureResult(errors);
 
-        // If TResponse is a generic Result<T>, create the failure result dynamically.
-        if (typeof(TResponse).IsGenericType && typeof(TResponse).GetGenericTypeDefinition() == typeof(Result<>))
+        state.SetHandled(failureResult);
+        return Task.CompletedTask;
+    }
+
+    private TResponse CreateFailureResult(string[] errors)
+    {
+        var factory = FailureFactoryCache.GetOrAdd(typeof(TResponse), CreateFailureFactory);
+        return (TResponse)factory(errors);
+    }
+
+    /// <summary>
+    /// Build a cached delegate to create failure results without repeated reflection.
+    /// </summary>
+    private static Func<string[], object> CreateFailureFactory(Type responseType)
+    {
+        var errorsParam = Expression.Parameter(typeof(string[]), "errors");
+
+        if (responseType.IsGenericType &&
+            responseType.GetGenericTypeDefinition() == typeof(Result<>))
         {
-            var valueType = typeof(TResponse).GetGenericArguments()[0];
-            var failureMethod = typeof(Result<>).MakeGenericType(valueType).GetMethod("Failure", new[] { typeof(string[]) });
-            if (failureMethod is null)
-            {
-                throw new InvalidOperationException("Could not find the 'Failure' method on Result<>.");
-            }
-            var resultObj = failureMethod.Invoke(null, new object[] { errors });
-            if (resultObj is null)
-            {
-                throw new InvalidOperationException("The 'Failure' method returned null.");
-            }
-            var result = (TResponse)resultObj;
-            state.SetHandled(result);
+            var valueType = responseType.GetGenericArguments()[0];
+            var genericResultType = typeof(Result<>).MakeGenericType(valueType);
+
+            var failureMethod = genericResultType.GetMethod(
+                "Failure",
+                BindingFlags.Public | BindingFlags.Static,
+                binder: null,
+                types: [typeof(string[])],
+                modifiers: null)
+                ?? throw new InvalidOperationException(
+                    $"Could not find the 'Failure' method on Result<{valueType.Name}>.");
+
+            var call = Expression.Call(null, failureMethod, errorsParam);
+            var cast = Expression.Convert(call, typeof(object));
+            return Expression.Lambda<Func<string[], object>>(cast, errorsParam).Compile();
         }
         else
         {
-            // For non-generic Result
-            state.SetHandled((TResponse)(object)Result.Failure(errors));
+            var failureMethod = typeof(Result).GetMethod(
+                "Failure",
+                BindingFlags.Public | BindingFlags.Static,
+                binder: null,
+                types: [typeof(string[])],
+                modifiers: null)
+                ?? throw new InvalidOperationException("Could not find the 'Failure' method on Result.");
+
+            var call = Expression.Call(null, failureMethod, errorsParam);
+            var cast = Expression.Convert(call, typeof(object));
+            return Expression.Lambda<Func<string[], object>>(cast, errorsParam).Compile();
         }
-        return Task.CompletedTask;
     }
 
     /// <summary>
     /// Maps specific database exceptions to user-friendly error messages.
     /// </summary>
-    private string[] GetErrors(DbUpdateException exception)
-    {
-        return exception switch
+    private string[] GetUserFriendlyErrors(DbUpdateException exception) =>
+        exception switch
         {
-            UniqueConstraintException e => GetUniqueConstraintExceptionErrors(e),
-            CannotInsertNullException e => GetCannotInsertNullExceptionErrors(e),
-            MaxLengthExceededException e => GetMaxLengthExceededExceptionErrors(e),
-            NumericOverflowException e => GetNumericOverflowExceptionErrors(e),
-            ReferenceConstraintException e => GetReferenceConstraintExceptionErrors(e),
-            _ => new[] { exception.GetBaseException().Message }
+            UniqueConstraintException uniqueEx => GetUniqueConstraintErrors(uniqueEx),
+            CannotInsertNullException => ["Required fields are missing. Please fill in all mandatory information."],
+            MaxLengthExceededException => ["Input data exceeds maximum length. Please reduce the size of your entries."],
+            NumericOverflowException => ["Numeric values are outside the valid range. Please enter appropriate numbers."],
+            ReferenceConstraintException referenceEx => GetReferenceConstraintErrors(referenceEx),
+            _ => GetGenericDatabaseErrors(exception)
         };
+
+    /// <summary>
+    /// Gets user-friendly error messages for unique constraint violations.
+    /// </summary>
+    private static string[] GetUniqueConstraintErrors(UniqueConstraintException exception)
+    {
+        var tableName = GetTableName(exception.SchemaQualifiedTableName);
+        var propertiesStr = GetConstraintProperties(exception.ConstraintProperties);
+
+        var message = !string.IsNullOrWhiteSpace(propertiesStr) && propertiesStr != "specified properties"
+            ? $"A record with the same {propertiesStr} already exists. Each {propertiesStr} must be unique."
+            : "A duplicate record was found. Please ensure all values are unique.";
+
+        return [message];
     }
 
-    private string[] GetUniqueConstraintExceptionErrors(UniqueConstraintException exception)
+    /// <summary>
+    /// Gets user-friendly error messages for reference constraint violations.
+    /// </summary>
+    private static string[] GetReferenceConstraintErrors(ReferenceConstraintException exception)
     {
-        var tableName = string.IsNullOrWhiteSpace(exception.SchemaQualifiedTableName) ? "unknown table" : exception.SchemaQualifiedTableName;
-        var properties = exception.ConstraintProperties != null && exception.ConstraintProperties.Any()
-            ? string.Join(", ", exception.ConstraintProperties)
-            : "unknown properties";
-
-        return new[]
-        {
-            $"A unique constraint violation occurred on constraint in table '{tableName}'. " +
-            $"'{properties}'. Please ensure the values are unique."
-        };
+        return ["Cannot complete this operation because the record has dependent data. Please remove related records first."];
     }
 
-    private string[] GetCannotInsertNullExceptionErrors(CannotInsertNullException exception)
+    /// <summary>
+    /// Gets generic error messages for unhandled database exceptions.
+    /// </summary>
+    private string[] GetGenericDatabaseErrors(DbUpdateException exception)
     {
-        return new[]
-        {
-            "Some required information is missing. Please make sure all required fields are filled out."
-        };
+        return ["A database error occurred. Please try again or contact support if the issue persists."];
     }
 
-    private string[] GetMaxLengthExceededExceptionErrors(MaxLengthExceededException exception)
+    #region Helper Methods
+
+    /// <summary>
+    /// Extracts and formats the table name from a schema-qualified table name.
+    /// </summary>
+    /// <param name="schemaQualifiedTableName">The schema-qualified table name.</param>
+    /// <returns>A formatted table name.</returns>
+    private static string GetTableName(string? schemaQualifiedTableName)
     {
-        return new[]
-        {
-            "Some input is too long. Please shorten the data entered in the fields."
-        };
+        if (string.IsNullOrWhiteSpace(schemaQualifiedTableName))
+            return "table";
+
+        // Extract table name from schema.table format
+        var parts = schemaQualifiedTableName.Split('.');
+        var tableName = parts.Length > 1 ? parts[^1] : schemaQualifiedTableName;
+        
+        // Remove brackets and quotes if present
+        tableName = tableName.Trim('[', ']', '"', '\'');
+        
+        return string.IsNullOrWhiteSpace(tableName) ? "table" : tableName;
     }
 
-    private string[] GetNumericOverflowExceptionErrors(NumericOverflowException exception)
+    /// <summary>
+    /// Formats constraint properties into a readable string.
+    /// </summary>
+    /// <param name="constraintProperties">The constraint properties.</param>
+    /// <returns>A formatted string of properties.</returns>
+    private static string GetConstraintProperties(IReadOnlyList<string>? constraintProperties)
     {
-        return new[]
-        {
-           "A number you entered is too large or too small. Please enter a number within the allowed range."
-        };
+        if (constraintProperties is null or { Count: 0 })
+            return "specified properties";
+
+        return constraintProperties.Count == 1 
+            ? constraintProperties[0] 
+            : string.Join(", ", constraintProperties);
     }
 
-    private string[] GetReferenceConstraintExceptionErrors(ReferenceConstraintException exception)
+    /// <summary>
+    /// Extracts and formats the constraint name.
+    /// </summary>
+    /// <param name="constraintName">The constraint name.</param>
+    /// <returns>A formatted constraint name.</returns>
+    private static string GetConstraintName(string? constraintName)
     {
-        var tableName = string.IsNullOrWhiteSpace(exception.SchemaQualifiedTableName) ? "unknown table" : exception.SchemaQualifiedTableName;
-        return new[]
+        if (string.IsNullOrWhiteSpace(constraintName))
+            return string.Empty;
+
+        // Remove common prefixes from constraint names
+        var clean = constraintName.AsSpan();
+        foreach (var prefix in ConstraintPrefixes)
         {
-            $"The operation failed because this record is linked to other records in {tableName}. " +
-            $"Please remove any related records first"
-        };
+            if (clean.StartsWith(prefix))
+            {
+                clean = clean[prefix.Length..];
+                break;
+            }
+        }
+
+        return clean.IsEmpty ? string.Empty : clean.ToString();
     }
+
+    #endregion
 }

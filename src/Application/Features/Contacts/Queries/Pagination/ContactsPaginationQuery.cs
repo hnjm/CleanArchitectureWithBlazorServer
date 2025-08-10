@@ -5,14 +5,16 @@
 //     See the LICENSE file in the project root for more information.
 //
 //     Author: neozhu
-//     Created Date: 2025-03-19
-//     Last Modified: 2025-03-19
+//     Created Date: 2025-07-18
+//     Last Modified: 2025-07-18
 //     Description: 
 //       Defines a query for retrieving contacts with pagination and filtering 
 //       options. The result is cached to enhance performance for repeated queries.
 // </auto-generated>
 //------------------------------------------------------------------------------
 #nullable enable
+#nullable disable warnings
+
 using CleanArchitecture.Blazor.Application.Features.Contacts.DTOs;
 using CleanArchitecture.Blazor.Application.Features.Contacts.Caching;
 using CleanArchitecture.Blazor.Application.Features.Contacts.Specifications;
@@ -33,24 +35,22 @@ public class ContactsWithPaginationQuery : ContactAdvancedFilter, ICacheableRequ
 public class ContactsWithPaginationQueryHandler :
          IRequestHandler<ContactsWithPaginationQuery, PaginatedData<ContactDto>>
 {
-        private readonly IApplicationDbContext _context;
-        private readonly IMapper _mapper;
-        public ContactsWithPaginationQueryHandler(
-            IMapper mapper,
-            IApplicationDbContext context)
-        {
-            _mapper = mapper;
-            _context = context;
-        }
+    private readonly IApplicationDbContextFactory _dbContextFactory;
+    private readonly IMapper _mapper;
+    public ContactsWithPaginationQueryHandler(
+        IApplicationDbContextFactory dbContextFactory,
+        IMapper mapper
+    )
+    {
+        _dbContextFactory = dbContextFactory;
+        _mapper = mapper;
+    }
 
-        public async Task<PaginatedData<ContactDto>> Handle(ContactsWithPaginationQuery request, CancellationToken cancellationToken)
-        {
-           var data = await _context.Contacts.OrderBy($"{request.OrderBy} {request.SortDirection}")
-                                                   .ProjectToPaginatedDataAsync<Contact, ContactDto>(request.Specification,
-                                                    request.PageNumber,
-                                                    request.PageSize,
-                                                    _mapper.ConfigurationProvider,
-                                                    cancellationToken);
-            return data;
-        }
+    public async Task<PaginatedData<ContactDto>> Handle(ContactsWithPaginationQuery request, CancellationToken cancellationToken)
+    {
+        await using var db = await _dbContextFactory.CreateAsync(cancellationToken);
+        var data = await db.Contacts.OrderBy($"{request.OrderBy} {request.SortDirection}")
+            .ProjectToPaginatedDataAsync<Contact, ContactDto>(request.Specification, request.PageNumber, request.PageSize, _mapper.ConfigurationProvider, cancellationToken);
+        return data;
+    }
 }

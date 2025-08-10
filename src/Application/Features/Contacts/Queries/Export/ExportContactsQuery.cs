@@ -5,8 +5,8 @@
 //     See the LICENSE file in the project root for more information.
 //
 //     Author: neozhu
-//     Created Date: 2025-03-19
-//     Last Modified: 2025-03-19
+//     Created Date: 2025-07-18
+//     Last Modified: 2025-07-18
 //     Description: 
 //       Defines a query to export contact data to an Excel file. This query 
 //       applies advanced filtering options and generates an Excel file with 
@@ -14,6 +14,8 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 #nullable enable
+#nullable disable warnings
+
 using CleanArchitecture.Blazor.Application.Features.Contacts.DTOs;
 using CleanArchitecture.Blazor.Application.Features.Contacts.Caching;
 using CleanArchitecture.Blazor.Application.Features.Contacts.Specifications;
@@ -34,27 +36,28 @@ public class ExportContactsQuery : ContactAdvancedFilter, ICacheableRequest<Resu
 public class ExportContactsQueryHandler :
          IRequestHandler<ExportContactsQuery, Result<byte[]>>
 {
+        private readonly IApplicationDbContextFactory _dbContextFactory;
         private readonly IMapper _mapper;
-        private readonly IApplicationDbContext _context;
         private readonly IExcelService _excelService;
         private readonly IStringLocalizer<ExportContactsQueryHandler> _localizer;
         private readonly ContactDto _dto = new();
         public ExportContactsQueryHandler(
+            IApplicationDbContextFactory dbContextFactory,
             IMapper mapper,
-            IApplicationDbContext context,
             IExcelService excelService,
             IStringLocalizer<ExportContactsQueryHandler> localizer
             )
         {
+            _dbContextFactory = dbContextFactory;
             _mapper = mapper;
-            _context = context;
             _excelService = excelService;
             _localizer = localizer;
         }
         #nullable disable warnings
         public async Task<Result<byte[]>> Handle(ExportContactsQuery request, CancellationToken cancellationToken)
         {
-            var data = await _context.Contacts.ApplySpecification(request.Specification)
+            await using var db = await _dbContextFactory.CreateAsync(cancellationToken);
+            var data = await db.Contacts.ApplySpecification(request.Specification)
                        .OrderBy($"{request.OrderBy} {request.SortDirection}")
                        .ProjectTo<ContactDto>(_mapper.ConfigurationProvider)
                        .AsNoTracking()
@@ -62,7 +65,6 @@ public class ExportContactsQueryHandler :
             var result = await _excelService.ExportAsync(data,
                 new Dictionary<string, Func<ContactDto, object?>>()
                 {
-                    // TODO: Define the fields that should be exported, for example:
                                      {_localizer[_dto.GetMemberDescription(x=>x.Name)],item => item.Name}, 
                  {_localizer[_dto.GetMemberDescription(x=>x.Description)],item => item.Description}, 
                  {_localizer[_dto.GetMemberDescription(x=>x.Email)],item => item.Email}, 

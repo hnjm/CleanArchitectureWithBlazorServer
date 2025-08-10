@@ -1,6 +1,7 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using CleanArchitecture.Blazor.Application.Common.ExceptionHandlers;
 using CleanArchitecture.Blazor.Application.Common.PublishStrategies;
 using CleanArchitecture.Blazor.Application.Pipeline;
 using CleanArchitecture.Blazor.Application.Pipeline.PreProcessors;
@@ -15,22 +16,20 @@ public static class DependencyInjection
     {
         services.AddAutoMapper(Assembly.GetExecutingAssembly());
         services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
-        services.AddTransient(typeof(IRequestExceptionHandler<,,>), typeof(DbExceptionHandler<,,>));
+      
         services.AddMediatR(config =>
         {
             config.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
-            config.NotificationPublisher = new ParallelNoWaitPublisher();
+            config.NotificationPublisherType = typeof(ChannelBasedNoWaitPublisher);
             config.AddRequestPreProcessor(typeof(IRequestPreProcessor<>), typeof(ValidationPreProcessor<>));
             config.AddOpenBehavior(typeof(PerformanceBehaviour<,>));
             config.AddOpenBehavior(typeof(FusionCacheBehaviour<,>));
             config.AddOpenBehavior(typeof(CacheInvalidationBehaviour<,>));
 
         });
-        services.AddScoped<UserProfileStateService>();
+      
+
         return services;
     }
-    public static void InitializeCacheFactory(this IHost host)
-    {
-        FusionCacheFactory.Configure(host.Services);
-    }
+    
 }

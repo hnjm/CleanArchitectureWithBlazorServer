@@ -1,13 +1,9 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using CleanArchitecture.Blazor.Application.Common.Interfaces;
+using CleanArchitecture.Blazor.Application.Features.LoginAudits.Caching;
 using CleanArchitecture.Blazor.Domain.Enums;
 using CleanArchitecture.Blazor.Domain.Identity;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using System.Collections.Concurrent;
 using ZiggyCreatures.Caching.Fusion;
 
@@ -15,41 +11,43 @@ namespace CleanArchitecture.Blazor.Infrastructure.Services;
 
 public class SecurityAnalysisService : ISecurityAnalysisService
 {
-    private readonly IServiceScopeFactory _scopeFactory;
+   
     private readonly ILogger<SecurityAnalysisService> _logger;
     private readonly IFusionCache _fusionCache;
     private readonly SecurityAnalysisOptions _options;
+    private readonly IApplicationDbContextFactory _dbContextFactory;
     
     // Cache for IP-based analysis to reduce database queries
     private static readonly ConcurrentDictionary<string, DateTime> _lastIpAnalysis = new();
 
     public SecurityAnalysisService(
-        IServiceScopeFactory scopeFactory,
         ILogger<SecurityAnalysisService> logger,
         IFusionCache fusionCache,
-        IOptions<SecurityAnalysisOptions> options)
+        IOptions<SecurityAnalysisOptions> options,
+        IApplicationDbContextFactory dbContextFactory)
     {
-        _scopeFactory = scopeFactory;
         _logger = logger;
         _fusionCache = fusionCache;
         _options = options.Value;
+        _dbContextFactory = dbContextFactory;
     }
 
     public async Task AnalyzeUserSecurityAsync(LoginAudit loginAudit, CancellationToken cancellationToken = default)
     {
         try
         {
-            using var scope = _scopeFactory.CreateScope();
-            var dbContext = scope.ServiceProvider.GetRequiredService<IApplicationDbContext>();
-
-            var analysisResult = await PerformSecurityAnalysisAsync(dbContext, loginAudit, cancellationToken);
+            await using var db = await _dbContextFactory.CreateAsync(cancellationToken);
+            var analysisResult = await PerformSecurityAnalysisAsync(db, loginAudit, cancellationToken);
             
-            await CreateOrUpdateRiskSummaryAsync(dbContext, loginAudit.UserId, loginAudit.UserName, 
+            await CreateOrUpdateRiskSummaryAsync(db, loginAudit.UserId, loginAudit.UserName, 
                 analysisResult, cancellationToken);
 
             // Invalidate cache for the user's risk summary
-            await _fusionCache.RemoveAsync($"UserLoginRiskSummary_{loginAudit.UserId}", token: cancellationToken);
-
+            foreach(var tag in LoginAuditCacheKey.Tags)
+            {
+                await _fusionCache.RemoveByTagAsync(tag, token: cancellationToken);
+            }
+            
             _logger.LogInformation("Security analysis completed for user {UserId}. Risk Level: {RiskLevel}, Score: {RiskScore}, Factors: {FactorCount}", 
                 loginAudit.UserId, analysisResult.RiskLevel, analysisResult.RiskScore, analysisResult.RiskFactors.Count);
         }

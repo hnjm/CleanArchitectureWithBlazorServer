@@ -81,16 +81,7 @@
         var state = await AuthState;
         var userName = state.User.GetUserName();
 
-        switch (Exception)
-        {
-            case ServerException e:
-                StatusCode = e.StatusCode.ToString();
-                if (e.ErrorMessages is not null)
-                {
-                    Message = string.Join(", ", e.ErrorMessages.ToArray());
-                }
-                break;
-            default:
+        
                 if (Exception.InnerException != null)
                 {
                     while (Exception.InnerException != null)
@@ -99,11 +90,11 @@
                     }
                 }
                 Message = Exception.Message;
-                break;
-        }
+             
 
         StackTrace = Exception.StackTrace;
-        Logger.LogError(Exception, "{Message}. request url: {@url} {@UserName}", Message, Navigation.Uri, userName);
+        var sanitizedUri = Navigation.Uri.Replace("\n", "").Replace("\r", "");
+        Logger.LogError(Exception, "{Message}. request url: {@url} {@UserName}", Message, sanitizedUri, userName);
     }
 
     private void OnRefresh()

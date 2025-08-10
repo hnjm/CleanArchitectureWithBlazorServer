@@ -1,9 +1,10 @@
-﻿using System.Reflection;
+﻿using System;
+using System.Reflection;
+using CleanArchitecture.Blazor.Application.Common.Constants.ClaimTypes;
+using CleanArchitecture.Blazor.Application.Common.Constants.Roles;
+using CleanArchitecture.Blazor.Application.Common.Constants.User;
+using CleanArchitecture.Blazor.Application.Common.Security;
 using CleanArchitecture.Blazor.Domain.Identity;
-using CleanArchitecture.Blazor.Infrastructure.Constants.ClaimTypes;
-using CleanArchitecture.Blazor.Infrastructure.Constants.Role;
-using CleanArchitecture.Blazor.Infrastructure.Constants.User;
-using CleanArchitecture.Blazor.Infrastructure.PermissionSet;
 
 namespace CleanArchitecture.Blazor.Infrastructure.Persistence;
 
@@ -15,11 +16,12 @@ public class ApplicationDbContextInitializer
     private readonly UserManager<ApplicationUser> _userManager;
 
     public ApplicationDbContextInitializer(ILogger<ApplicationDbContextInitializer> logger,
-        ApplicationDbContext context, UserManager<ApplicationUser> userManager,
+        IDbContextFactory<ApplicationDbContext> dbContextFactory,
+        UserManager<ApplicationUser> userManager,
         RoleManager<ApplicationRole> roleManager)
     {
         _logger = logger;
-        _context = context;
+        _context = dbContextFactory.CreateDbContext();
         _userManager = userManager;
         _roleManager = roleManager;
     }
@@ -86,11 +88,11 @@ public class ApplicationDbContextInitializer
     {
         if (await _context.Tenants.AnyAsync()) return;
 
-        _logger.LogInformation("Seeding tenants...");
+        _logger.LogInformation("Seeding organizations...");
         var tenants = new[]
         {
-                new Tenant { Name = "Master", Description = "Master Site" },
-                new Tenant { Name = "Slave", Description = "Slave Site" }
+                new Tenant { Name = "Main", Description = "Main Site" },
+                new Tenant { Name = "Europe", Description = "Europe Site" }
             };
 
         await _context.Tenants.AddRangeAsync(tenants);

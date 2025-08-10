@@ -1,10 +1,12 @@
 ﻿using System.Net.Http.Headers;
-using ActualLab.Fusion.Blazor;
 using CleanArchitecture.Blazor.Application;
-using CleanArchitecture.Blazor.Infrastructure.Constants.Localization;
+using CleanArchitecture.Blazor.Application.Common.Constants.Localization;
+using CleanArchitecture.Blazor.Application.Common.Interfaces;
+using CleanArchitecture.Blazor.Infrastructure.Services.Identity;
 using CleanArchitecture.Blazor.Server.UI.Hubs;
 using CleanArchitecture.Blazor.Server.UI.Middlewares;
 using CleanArchitecture.Blazor.Server.UI.Services;
+using CleanArchitecture.Blazor.Server.UI.Services.Identity;
 using CleanArchitecture.Blazor.Server.UI.Services.JsInterop;
 using CleanArchitecture.Blazor.Server.UI.Services.Layout;
 using CleanArchitecture.Blazor.Server.UI.Services.Navigation;
@@ -13,11 +15,12 @@ using CleanArchitecture.Blazor.Server.UI.Services.UserPreferences;
 using Hangfire;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Localization;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.FileProviders;
 using MudBlazor.Services;
 using QuestPDF;
 using QuestPDF.Infrastructure;
-using Toolbelt.Blazor.Extensions.DependencyInjection;
+
 
 
 namespace CleanArchitecture.Blazor.Server.UI;
@@ -62,7 +65,7 @@ public static class DependencyInjection
         services.AddMudPopoverService();
         services.AddMudBlazorSnackbar();
         services.AddMudBlazorDialog();
-        services.AddHotKeys2();
+
 
         services.AddScoped<LocalizationCookiesMiddleware>()
             .Configure<RequestLocalizationOptions>(options =>
@@ -86,17 +89,23 @@ public static class DependencyInjection
         services.AddControllers();
 
         services.AddScoped<IApplicationHubWrapper, ServerHubWrapper>()
-            .AddSignalR(options=>options.MaximumReceiveMessageSize=64*1024);
+            .AddSignalR(options =>
+            {
+                options.MaximumReceiveMessageSize = 64 * 1024;
+                options.AddFilter<UserContextHubFilter>();
+            });
         services.AddExceptionHandler<GlobalExceptionHandler>();
         services.AddProblemDetails();
         services.AddHealthChecks();
 
 
-        services.AddHttpClient("ocr", c =>
+        services.AddHttpClient("ocr", (serviceProvider, c) =>
         {
-            var gemini_api_key = config["AI:GEMINI_API_KEY"];
-            c.BaseAddress = new Uri($"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-04-17:generateContent?key={gemini_api_key}");
+            var aiSettings = serviceProvider.GetRequiredService<IAISettings>();
+            c.BaseAddress = new Uri("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent");
             c.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            c.DefaultRequestHeaders.Add("x-goog-api-key", aiSettings.GeminiApiKey);
+           
         });
         services.AddScoped<LocalTimeOffset>();
         services.AddScoped<HubClient>();
@@ -104,9 +113,9 @@ public static class DependencyInjection
             .AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>()
             .AddScoped<LayoutService>()
             .AddScoped<DialogServiceHelper>()
-            .AddScoped<PermissionHelper>()
-            .AddScoped<CleanArchitecture.Blazor.Server.UI.Services.Identity.UserPermissionAssignmentService>()
-            .AddScoped<CleanArchitecture.Blazor.Server.UI.Services.Identity.RolePermissionAssignmentService>()
+            .AddScoped<IPermissionHelper, PermissionHelper>()
+            .AddScoped<UserPermissionAssignmentService>()
+            .AddScoped<RolePermissionAssignmentService>()
             .AddScoped<BlazorDownloadFileService>()
             .AddScoped<IUserPreferencesService, UserPreferencesService>()
             .AddScoped<IMenuService, MenuService>()
@@ -141,7 +150,7 @@ public static class DependencyInjection
             // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
             app.UseHsts();
         }
-        app.InitializeCacheFactory();
+        
         app.UseStatusCodePagesWithRedirects("/404");
         app.MapHealthChecks("/health");
         app.UseAuthentication();

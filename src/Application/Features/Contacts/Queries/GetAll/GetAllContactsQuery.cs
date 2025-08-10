@@ -5,8 +5,8 @@
 //     See the LICENSE file in the project root for more information.
 //
 //     Author: neozhu
-//     Created Date: 2025-03-19
-//     Last Modified: 2025-03-19
+//     Created Date: 2025-07-18
+//     Last Modified: 2025-07-18
 //     Description: 
 //       Defines a query to retrieve all contacts from the database. The result 
 //       is cached to improve performance and reduce database load for repeated 
@@ -14,6 +14,8 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 #nullable enable
+#nullable disable warnings
+
 using CleanArchitecture.Blazor.Application.Features.Contacts.DTOs;
 using CleanArchitecture.Blazor.Application.Features.Contacts.Caching;
 
@@ -28,21 +30,23 @@ public class GetAllContactsQuery : ICacheableRequest<IEnumerable<ContactDto>>
 public class GetAllContactsQueryHandler :
      IRequestHandler<GetAllContactsQuery, IEnumerable<ContactDto>>
 {
-    private readonly IApplicationDbContext _context;
+    private readonly IApplicationDbContextFactory _dbContextFactory;
     private readonly IMapper _mapper;
     public GetAllContactsQueryHandler(
-        IMapper mapper,
-        IApplicationDbContext context)
+        IApplicationDbContextFactory dbContextFactory,
+        IMapper mapper
+    )
     {
+        _dbContextFactory = dbContextFactory;
         _mapper = mapper;
-        _context = context;
     }
 
     public async Task<IEnumerable<ContactDto>> Handle(GetAllContactsQuery request, CancellationToken cancellationToken)
     {
-        var data = await _context.Contacts.ProjectTo<ContactDto>(_mapper.ConfigurationProvider)
-                                                .AsNoTracking()
-                                                .ToListAsync(cancellationToken);
+        await using var db = await _dbContextFactory.CreateAsync(cancellationToken);
+        var data = await db.Contacts
+            .ProjectTo<ContactDto>(_mapper.ConfigurationProvider)
+            .ToListAsync(cancellationToken);
         return data;
     }
 }

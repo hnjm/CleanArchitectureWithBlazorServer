@@ -2,14 +2,13 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 
-using CleanArchitecture.Blazor.Domain.Entities;
 using CleanArchitecture.Blazor.Domain.Identity;
 using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace CleanArchitecture.Blazor.Application.Common.Interfaces;
 
-public interface IApplicationDbContext
+public interface IApplicationDbContext: IAsyncDisposable
 {
     DbSet<SystemLog> SystemLogs { get; set; }
     DbSet<AuditTrail> AuditTrails { get; set; }
