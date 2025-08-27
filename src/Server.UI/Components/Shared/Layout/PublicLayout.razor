@@ -4,8 +4,7 @@
 @inject LayoutService LayoutService
 @inject IStringLocalizer<PublicLayout> L
 <MudLayout>
-    <MudAppBar Elevation="0"
-               Style="background: --mud-palette-appbar-background">
+    <MudAppBar Elevation="0" Style="backdrop-filter: blur(6px) !important; -webkit-backdrop-filter: blur(6px) !important; background: var(--mud-palette-appbar-background); color: var(--mud-palette-appbar-text);" >
         <NavLink ActiveClass="d-flex align-center me-4" href="/">
             <MudIcon Class="ml-6 mr-2"
                      Color="Color.Primary"
@@ -87,10 +86,10 @@
         </MudHidden>
     </MudAppBar>
     <MudMainContent>
-        <MudContainer MaxWidth="MaxWidth.Large" Class="mb-4 mt-4" Style="height:max-content">
-            <MudPaper Class="pa-16 ma-2" Elevation="3" Square Style="height:100dvh;background: url(/img/pattern.svg) no-repeat center bottom; background-size: cover;">
+        <MudContainer MaxWidth="MaxWidth.Large" Class="mb-4 mt-4" Style="height:max-content;background: var(--mud-palette-background);">
+          
                 @Body
-            </MudPaper>
+             
         </MudContainer>
     </MudMainContent>
 </MudLayout>
