@@ -1,19 +1,16 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Reflection;
 using CleanArchitecture.Blazor.Application.Common.Interfaces.MultiTenant;
+using CleanArchitecture.Blazor.Application.Common.Models;
 using CleanArchitecture.Blazor.Domain.Identity;
 using CleanArchitecture.Blazor.Infrastructure.Configurations;
-using CleanArchitecture.Blazor.Application.Common.Constants.ClaimTypes;
-using CleanArchitecture.Blazor.Application.Common.Constants.Database;
-using CleanArchitecture.Blazor.Application.Common.Constants.User;
 using CleanArchitecture.Blazor.Application.Common.Security;
 using CleanArchitecture.Blazor.Infrastructure.Persistence.Interceptors;
 using CleanArchitecture.Blazor.Infrastructure.Services.Circuits;
 using CleanArchitecture.Blazor.Infrastructure.Services.Gemini;
 using CleanArchitecture.Blazor.Infrastructure.Services.MultiTenant;
-using FluentEmail.MailKitSmtp;
 using Microsoft.AspNetCore.Components.Server.Circuits;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore.Diagnostics;
@@ -21,6 +18,7 @@ using Microsoft.Extensions.Configuration;
 using ZiggyCreatures.Caching.Fusion;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.AspNetCore.Http;
+using CleanArchitecture.Blazor.Application.Common.Constants;
 
 namespace CleanArchitecture.Blazor.Infrastructure;
 public static class DependencyInjection
@@ -199,12 +197,6 @@ public static class DependencyInjection
         services.AddSingleton(smtpClientOptions);
         services.AddScoped<IMailService, MailService>();
 
-        // configure your sender and template choices with dependency injection.
-        var defaultFromEmail = configuration.GetValue<string>(SMTP_CLIENT_OPTIONS_DEFAULT_FROM_EMAIL);
-        services.AddFluentEmail(defaultFromEmail ?? DEFAULT_FROM_EMAIL)
-            .AddRazorRenderer(Path.Combine(Directory.GetCurrentDirectory(), EMAIL_TEMPLATES_PATH))
-            .AddMailKitSender(smtpClientOptions);
-
         return services;
     }
     #endregion
@@ -276,7 +268,7 @@ public static class DependencyInjection
             .AddScoped<IUserProfileState, UserProfileState>()
             .AddAuthorizationCore(options =>
             {
-                options.AddPolicy("CanPurge", policy => policy.RequireUserName(UserName.Administrator));
+                options.AddPolicy("CanPurge", policy => policy.RequireUserName(Users.Administrator));
                 // Here I stored necessary permissions/roles in a constant
                 foreach (var prop in typeof(Permissions).GetNestedTypes().SelectMany(c =>
                              c.GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy)))
@@ -335,15 +327,22 @@ public static class DependencyInjection
         services.AddFusionCache().WithDefaultEntryOptions(new FusionCacheEntryOptions
         {
             // CACHE DURATION
-            Duration = TimeSpan.FromMinutes(120),
-            // FAIL-SAFE OPTIONS
+            Duration = TimeSpan.FromMinutes(60),
+            // —— Resilience: fail-safe & timeouts ——
+            // Keep fail-safe short: if dependencies are flaky, we can serve a recent value briefly,
+            // but avoid long windows for security-sensitive data.
             IsFailSafeEnabled = true,
-            FailSafeMaxDuration = TimeSpan.FromHours(8),
-            FailSafeThrottleDuration = TimeSpan.FromSeconds(30),
-            // FACTORY TIMEOUTS
-            FactorySoftTimeout = TimeSpan.FromSeconds(10),
-            FactoryHardTimeout = TimeSpan.FromSeconds(30),
-            AllowTimedOutFactoryBackgroundCompletion = true,
+            FailSafeMaxDuration = TimeSpan.FromMinutes(20),
+            FailSafeThrottleDuration = TimeSpan.FromSeconds(15),
+
+            // Factory timeouts mostly affect GetOrSet (not used here), but are kept for consistency.
+            FactorySoftTimeout = TimeSpan.FromMilliseconds(250),
+            FactoryHardTimeout = TimeSpan.FromMilliseconds(1000),
+
+            // —— Anti-stampede ——
+            // Spread expirations to mitigate thundering herds; short lock to avoid long waits.
+            JitterMaxDuration = TimeSpan.FromSeconds(30),
+            LockTimeout = TimeSpan.FromSeconds(1)
         });
         return services;
     }

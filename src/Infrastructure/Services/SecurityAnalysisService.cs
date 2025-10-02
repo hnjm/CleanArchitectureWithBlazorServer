@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using CleanArchitecture.Blazor.Application.Features.LoginAudits.Caching;
@@ -367,7 +367,7 @@ public class SecurityAnalysisService : ISecurityAnalysisService
                 existingSummary.RiskScore = analysisResult.RiskScore;
                 existingSummary.Description = description;
                 existingSummary.Advice = advice;
-                existingSummary.LastModified = DateTime.UtcNow;
+                existingSummary.LastModifiedAt = DateTime.UtcNow;
             }
         }
         else

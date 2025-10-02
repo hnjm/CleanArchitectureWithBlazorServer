@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using ZiggyCreatures.Caching.Fusion;
@@ -23,7 +23,7 @@ public class CacheInvalidationBehaviour<TRequest, TResponse> : IPipelineBehavior
     public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next,
         CancellationToken cancellationToken)
     {
-        _logger.LogTrace("Handling request of type {RequestType} with details {@Request}", nameof(request), request);
+        _logger.LogTrace("Handling request of type {RequestType}", typeof(TRequest).Name);
         var response = await next().ConfigureAwait(false);
         if (!string.IsNullOrEmpty(request.CacheKey))
         {

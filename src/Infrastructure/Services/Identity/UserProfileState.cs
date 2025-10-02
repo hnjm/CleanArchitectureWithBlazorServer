@@ -1,3 +1,4 @@
+using CleanArchitecture.Blazor.Application.Common.Constants;
 using CleanArchitecture.Blazor.Application.Common.Interfaces.Identity;
 using CleanArchitecture.Blazor.Application.Common.Security;
 using CleanArchitecture.Blazor.Application.Features.Identity.DTOs;
@@ -109,7 +110,8 @@ public class UserProfileState : IUserProfileState, IDisposable
         await _semaphore.WaitAsync(cancellationToken);
         try
         {
-            ClearCacheInternal(_currentUserId);
+            var cacheKey = UserCacheKeys.GetCacheKey(_currentUserId, UserCacheType.Application);
+            await _fusionCache.RemoveAsync(cacheKey);
             
             var result = await LoadUserProfileFromDatabaseAsync(_currentUserId, cancellationToken);
 
@@ -138,7 +140,12 @@ public class UserProfileState : IUserProfileState, IDisposable
         ArgumentNullException.ThrowIfNull(userProfile);
         _currentUserId = userProfile.UserId;
         SetInternal(userProfile);
-        ClearCacheInternal(userProfile.UserId);
+        // Clear cache in background - don't block the UI
+        _ = Task.Run(async () => 
+        {
+            var cacheKey = UserCacheKeys.GetCacheKey(userProfile.UserId, UserCacheType.Application);
+            await _fusionCache.RemoveAsync(cacheKey);
+        });
     }
 
     /// <summary>
@@ -166,7 +173,12 @@ public class UserProfileState : IUserProfileState, IDisposable
         };
 
         SetInternal(updatedProfile);
-        ClearCacheInternal(_currentValue.UserId);
+        // Clear cache in background - don't block the UI
+        _ = Task.Run(async () => 
+        {
+            var cacheKey = UserCacheKeys.GetCacheKey(_currentValue.UserId, UserCacheType.Application);
+            await _fusionCache.RemoveAsync(cacheKey);
+        });
     }
 
     /// <summary>
@@ -176,7 +188,12 @@ public class UserProfileState : IUserProfileState, IDisposable
     {
         if (!string.IsNullOrWhiteSpace(_currentUserId))
         {
-            ClearCacheInternal(_currentUserId);
+            // Clear cache in background - don't block the UI
+            _ = Task.Run(async () => 
+            {
+                var cacheKey = UserCacheKeys.GetCacheKey(_currentUserId, UserCacheType.Application);
+                await _fusionCache.RemoveAsync(cacheKey);
+            });
         }
     }
 
@@ -195,15 +212,7 @@ public class UserProfileState : IUserProfileState, IDisposable
     private string GetApplicationUserCacheKey(string userId)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(userId);
-        return $"GetApplicationUserDto:UserId:{userId}";
-    }
-
-    private void ClearCacheInternal(string userId)
-    {
-        if (string.IsNullOrWhiteSpace(userId))
-            return;
-        
-        _fusionCache.Remove(GetApplicationUserCacheKey(userId));
+        return UserCacheKeys.GetCacheKey(userId, UserCacheType.Application);
     }
 
     /// <summary>
@@ -255,7 +264,8 @@ public class UserProfileState : IUserProfileState, IDisposable
 
             // Update local state and cache
             UpdateLocal(languageCode: languageCode);
-            ClearCacheInternal(_currentUserId);
+            var cacheKey = UserCacheKeys.GetCacheKey(_currentUserId, UserCacheType.Application);
+            await _fusionCache.RemoveAsync(cacheKey);
         }
         catch (Exception ex)
         {

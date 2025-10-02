@@ -35,7 +35,7 @@ public class AuditTrailDto
         {
             CreateMap<AuditTrail, AuditTrailDto>(MemberList.None)
                 .ForMember(x => x.PrimaryKey,
-                    s => s.MapFrom(y => JsonSerializer.Serialize(y.PrimaryKey, DefaultJsonSerializerOptions.Options)));
+                    s => s.MapFrom(y => JsonSerializer.Serialize(y.PrimaryKey, JsonSerializerOptions.Web)));
         }
     }
 

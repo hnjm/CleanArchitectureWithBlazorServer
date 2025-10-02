@@ -1,4 +1,5 @@
-﻿using CleanArchitecture.Blazor.Application.Common.Extensions;
+using CleanArchitecture.Blazor.Application.Common.Constants;
+using CleanArchitecture.Blazor.Application.Common.Extensions;
 using CleanArchitecture.Blazor.Application.Common.Interfaces.Identity;
 using CleanArchitecture.Blazor.Domain.Identity;
 using Microsoft.AspNetCore.Identity;
@@ -44,7 +45,7 @@ public class UserContextLoader : IUserContextLoader
             return null;
         }
 
-        var cacheKey = $"UserContext:{userId}";
+        var cacheKey = UserCacheKeys.GetCacheKey(userId, UserCacheType.Context);
 
         return await _fusionCache.GetOrSetAsync(
             cacheKey,
@@ -91,7 +92,7 @@ public class UserContextLoader : IUserContextLoader
     {
         if (!string.IsNullOrEmpty(userId))
         {
-            var cacheKey = $"UserContext:{userId}";
+            var cacheKey = UserCacheKeys.GetCacheKey(userId, UserCacheType.Context);
             _fusionCache.Remove(cacheKey);
         }
     }

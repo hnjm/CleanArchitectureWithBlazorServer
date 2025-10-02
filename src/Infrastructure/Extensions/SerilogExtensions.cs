@@ -1,7 +1,6 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using System.Data;
 using CleanArchitecture.Blazor.Infrastructure.Configurations;
-using CleanArchitecture.Blazor.Application.Common.Constants.Database;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
@@ -14,6 +13,7 @@ using Serilog.Sinks.MSSqlServer;
 using Serilog.Sinks.PostgreSQL;
 using Serilog.Sinks.PostgreSQL.ColumnWriters;
 using ColumnOptions = Serilog.Sinks.MSSqlServer.ColumnOptions;
+using CleanArchitecture.Blazor.Application.Common.Constants;
 
 namespace CleanArchitecture.Blazor.Infrastructure.Extensions;
 

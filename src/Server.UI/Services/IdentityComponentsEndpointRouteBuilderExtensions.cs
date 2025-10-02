@@ -1,13 +1,13 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
 using System.Text.Json;
 using CleanArchitecture.Blazor.Domain.Identity;
-using CleanArchitecture.Blazor.Application.Common.Constants.Roles;
 using CleanArchitecture.Blazor.Server.UI.Pages.Identity.Login;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Primitives;
+using CleanArchitecture.Blazor.Application.Common.Constants;
 
 namespace CleanArchitecture.Blazor.Server.UI.Services;
 
@@ -280,7 +280,7 @@ internal static class IdentityComponentsEndpointRouteBuilderExtensions
             // Configure authentication properties for the external provider
             var properties = signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
             logger.LogInformation("Redirecting to external login provider {Provider} with return URL {ReturnUrl}", provider, returnUrl);
-            return TypedResults.Challenge(properties, [provider]);
+            return TypedResults.Challenge(properties, [provider??string.Empty]);
         });
 
         // Configure external login callback handling endpoint
@@ -389,13 +389,13 @@ internal static class IdentityComponentsEndpointRouteBuilderExtensions
             };
             
             // Ensure the basic role exists for the tenant
-            var role = await roleManager.Roles.Where(x => x.TenantId == user.TenantId && x.Name == RoleName.Basic).FirstOrDefaultAsync();
+            var role = await roleManager.Roles.Where(x => x.TenantId == user.TenantId && x.Name == Roles.Basic).FirstOrDefaultAsync();
             if (role is null)
             {
                 role = new ApplicationRole
                 {
-                    Name = RoleName.Basic,
-                    NormalizedName = RoleName.Basic.ToUpperInvariant(),
+                    Name = Roles.Basic,
+                    NormalizedName = Roles.Basic.ToUpperInvariant(),
                     TenantId = user.TenantId
                 };
                 var roleResult = await roleManager.CreateAsync(role);

@@ -1,4 +1,4 @@
-﻿@page "/identity/users"
+@page "/identity/users"
 
 @using CleanArchitecture.Blazor.Application.Features.Identity.Notifications.UserActivation
 @using CleanArchitecture.Blazor.Application.Common.Interfaces.MultiTenant
@@ -15,8 +15,6 @@
 @using CleanArchitecture.Blazor.Server.UI.Pages.Identity.Roles.Components
 @using CleanArchitecture.Blazor.Server.UI.Pages.Identity.Users.Components
 @using System.Linq.Expressions
-@using CleanArchitecture.Blazor.Application.Common.Constants.Roles
-@using CleanArchitecture.Blazor.Application.Common.Constants.ClaimTypes
 @using System.Security.Claims
 @using System.Globalization
 @using CleanArchitecture.Blazor.Server.UI.Pages.Identity.Login
@@ -69,28 +67,28 @@
                     <MudButton Disabled="@_isLoading"
                                OnClick="RefreshDataGrid"
                                StartIcon="@Icons.Material.Outlined.Refresh">
-                        @ConstantString.Refresh
+                        @AppStrings.Refresh
                     </MudButton>
                     @if (_accessRights.Create)
                     {
                         <MudButton StartIcon="@Icons.Material.Outlined.Add"
                                    OnClick="CreateUser">
-                            @ConstantString.New
+                            @AppStrings.New
                         </MudButton>
                     }
-                    <MudMenu TransformOrigin="Origin.BottomRight" AnchorOrigin="Origin.BottomRight" EndIcon="@Icons.Material.Filled.MoreVert" Label="@ConstantString.More">
+                    <MudMenu TransformOrigin="Origin.BottomRight" AnchorOrigin="Origin.BottomRight" EndIcon="@Icons.Material.Filled.MoreVert" Label="@AppStrings.More">
                         @if (_accessRights.Delete)
                         {
                             <MudMenuItem Disabled="@(!_selectedUsers.Any())"
                                          OnClick="DeleteCheckedUsersAsync">
-                                @ConstantString.Delete
+                                @AppStrings.Delete
                             </MudMenuItem>
                         }
                         @if (_accessRights.Export)
                         {
                             <MudMenuItem Disabled="@_isExporting"
                                          OnClick="ExportUsersAsync">
-                                @ConstantString.Export
+                                @AppStrings.Export
                             </MudMenuItem>
                         }
                         @if (_accessRights.Import)
@@ -101,7 +99,7 @@
                                         <MudButton Class="pa-0 ma-0" Style="font-weight:400;text-transform:none;"
                                                    Variant="Variant.Text"
                                                    Disabled="@_isUploading">
-                                            @ConstantString.Import
+                                            @AppStrings.Import
                                         </MudButton>
                                     </ActivatorContent>
                                 </MudFileUpload>
@@ -118,7 +116,7 @@
                                 <MudSelectItem Value="@role">@role</MudSelectItem>
                             }
                         </MudSelect>
-                        <MudTextField T="string" Immediate="false" ValueChanged="SearchUsers" Value="@_searchString" Placeholder="@ConstantString.Search" Adornment="Adornment.End"
+                        <MudTextField T="string" Immediate="false" ValueChanged="SearchUsers" Value="@_searchString" Placeholder="@AppStrings.Search" Adornment="Adornment.End"
                                       AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Small">
                         </MudTextField>
                     }
@@ -128,7 +126,7 @@
     </ToolBarContent>
     <Columns>
         <SelectColumn ShowInFooter="false" />
-        <TemplateColumn HeaderStyle="width:60px" Title="@ConstantString.Actions" Sortable="false">
+        <TemplateColumn HeaderStyle="width:60px" Title="@AppStrings.Actions" Sortable="false">
             <CellTemplate>
                 @if (_accessRights.Edit || _accessRights.Delete || _accessRights.ManageRoles ||
                                 _accessRights.RestPassword || _accessRights.SendRestPasswordMail || _accessRights.ManagePermissions)
@@ -138,11 +136,11 @@
                              EndIcon="@Icons.Material.Filled.KeyboardArrowDown" IconColor="Color.Info" AnchorOrigin="Origin.CenterLeft">
                         @if (_accessRights.Edit)
                         {
-                            <MudMenuItem OnClick="@(() => EditUser(context.Item))">@ConstantString.Edit</MudMenuItem>
+                            <MudMenuItem OnClick="@(() => EditUser(context.Item))">@AppStrings.Edit</MudMenuItem>
                         }
                         @if (_accessRights.Delete)
                         {
-                            <MudMenuItem OnClick="@(() => DeleteUserAsync(context.Item))">@ConstantString.Delete</MudMenuItem>
+                            <MudMenuItem OnClick="@(() => DeleteUserAsync(context.Item))">@AppStrings.Delete</MudMenuItem>
                         }
                         @if (_accessRights.ManagePermissions)
                         {
@@ -163,7 +161,7 @@
                     <MudButton Variant="Variant.Outlined"
                                StartIcon="@Icons.Material.Filled.DoNotTouch" IconColor="Color.Secondary" Size="Size.Small"
                                Color="Color.Surface">
-                        @ConstantString.NoAllowed
+                        @AppStrings.NoAllowed
                     </MudButton>
                 }
             </CellTemplate>
@@ -216,9 +214,9 @@
                 </div>
             </CellTemplate>
         </PropertyColumn>
-        <PropertyColumn Property="x => x.LastModified" Title="@Localizer[_currentUserDto.GetMemberDescription(x => x.LastModified)]">
+        <PropertyColumn Property="x => x.LastModifiedAt" Title="@Localizer[_currentUserDto.GetMemberDescription(x => x.LastModifiedAt)]">
             <CellTemplate>
-                <UtcToLocal UTCDateTime="@(context.Item.LastModified ?? context.Item.Created)" Format="yyyy-MM-dd" />
+                <UtcToLocal UTCDateTime="@(context.Item.LastModifiedAt ?? context.Item.CreatedAt)" Format="yyyy-MM-dd HH:mm:ss" />
             </CellTemplate>
         </PropertyColumn>
     </Columns>
@@ -398,7 +396,7 @@
             IsActive = model.IsActive,
             LanguageCode = model.LanguageCode,
             TimeZoneId = model.TimeZoneId,
-            Created = DateTime.UtcNow
+            CreatedAt = DateTime.UtcNow
         };
 
         var result = await _userManager.CreateAsync(newUser);
@@ -436,7 +434,7 @@
         user.SuperiorId = model.Superior?.Id;
         user.LanguageCode = model.LanguageCode;
         user.TimeZoneId = model.TimeZoneId;
-        user.LastModified = DateTime.UtcNow;
+        user.LastModifiedAt = DateTime.UtcNow;
         var updateResult = await _userManager.UpdateAsync(user);
         if (updateResult.Succeeded)
         {
@@ -488,8 +486,8 @@
 
     private async Task ShowDeleteConfirmationAsync(ApplicationUserDto model, Func<Task> onConfirmed)
     {
-        var message = string.Format(ConstantString.DeleteConfirmation, model.UserName);
-        await DialogServiceHelper.ShowConfirmationDialogAsync(ConstantString.DeleteConfirmationTitle, message, onConfirmed);
+        var message = string.Format(AppStrings.DeleteConfirmation, model.UserName);
+        await DialogServiceHelper.ShowConfirmationDialogAsync(AppStrings.DeleteConfirmationTitle, message, onConfirmed);
     }
 
     private async Task DeleteUserAsync(ApplicationUserDto model)
@@ -516,7 +514,7 @@
         if (result.Succeeded)
         {
             Logger.LogInformation("User deleted: {UserName} (ID: {UserId})", user.UserName, user.Id);
-            Snackbar.Add(ConstantString.DeleteSuccess, Severity.Info);
+            Snackbar.Add(AppStrings.DeleteSuccess, Severity.Info);
             await RefreshDataGrid();
             await UserService.RefreshAsync();
         }
@@ -534,8 +532,8 @@
             Snackbar.Add(Localizer["You cannot delete your own account!"], Severity.Error);
             return;
         }
-        var message = string.Format(ConstantString.DeleteConfirmation, _selectedUsers.Count);
-        await DialogServiceHelper.ShowConfirmationDialogAsync(ConstantString.DeleteConfirmationTitle, message, DeleteSelectedUsersAsync);
+        var message = string.Format(AppStrings.DeleteConfirmation, _selectedUsers.Count);
+        await DialogServiceHelper.ShowConfirmationDialogAsync(AppStrings.DeleteConfirmationTitle, message, DeleteSelectedUsersAsync);
     }
 
     private async Task DeleteSelectedUsersAsync()
@@ -553,7 +551,7 @@
             }
             Logger.LogInformation("User deleted: {UserName} (ID: {UserId})", user.UserName, user.Id);
         }
-        Snackbar.Add(ConstantString.DeleteSuccess, Severity.Info);
+        Snackbar.Add(AppStrings.DeleteSuccess, Severity.Info);
         await RefreshDataGrid();
         await UserService.RefreshAsync();
     }
@@ -641,7 +639,7 @@
     {
         user.IsActive = true;
         user.LockoutEnd = null;
-        user.LastModified = DateTime.UtcNow;
+        user.LastModifiedAt = DateTime.UtcNow;
         var result = await _userManager.UpdateAsync(user);
         if (result.Succeeded)
         {
@@ -659,7 +657,7 @@
     {
         user.IsActive = false;
         user.LockoutEnd = DateTimeOffset.MaxValue;
-        user.LastModified = DateTime.UtcNow;
+        user.LastModifiedAt = DateTime.UtcNow;
         var result = await _userManager.UpdateAsync(user);
         if (result.Succeeded)
         {
@@ -740,7 +738,7 @@
 
             var fileData = await ExportUsersToExcelAsync(users);
             await DownloadFileService.DownloadFileAsync($"{Localizer["Users"]}.xlsx", fileData, "application/octet-stream");
-            Snackbar.Add(ConstantString.ExportSuccess, Severity.Info);
+            Snackbar.Add(AppStrings.ExportSuccess, Severity.Info);
         }
         finally
         {
@@ -768,7 +766,7 @@
         try
         {
             using var stream = new MemoryStream();
-            await file.OpenReadStream(GlobalVariable.MaxAllowedSize).CopyToAsync(stream);
+            await file.OpenReadStream(GlobalVariables.MaxAllowedSize).CopyToAsync(stream);
             var importResult = await ImportUsersFromExcelAsync(stream);
             if (importResult?.Succeeded == true)
             {
@@ -777,7 +775,7 @@
                     await ProcessImportedUsersAsync(importResult.Data);
                     await _dataGrid.ReloadServerData();
                 }
-                Snackbar.Add(ConstantString.ImportSuccess, Severity.Info);
+                Snackbar.Add(AppStrings.ImportSuccess, Severity.Info);
             }
             else if (importResult?.Errors != null)
             {
@@ -812,7 +810,7 @@
                 var result = await _userManager.CreateAsync(user);
                 if (result.Succeeded)
                 {
-                    await _userManager.AddToRolesAsync(user, new[] { RoleName.Basic });
+                    await _userManager.AddToRolesAsync(user, new[] { Roles.Basic });
                 }
                 else
                 {

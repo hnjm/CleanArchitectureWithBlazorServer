@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using CleanArchitecture.Blazor.Domain.Common.Entities;
@@ -23,9 +23,9 @@ public class ApplicationRole : IdentityRole, IAuditableEntity
     public string? Description { get; set; }
     public virtual ICollection<ApplicationRoleClaim> RoleClaims { get; set; }
     public virtual ICollection<ApplicationUserRole> UserRoles { get; set; }
-    public DateTime? Created { get; set; }
-    public string? CreatedBy { get; set; }
-    public DateTime? LastModified { get; set; }
-    public string? LastModifiedBy { get; set; }
+    public DateTime? CreatedAt { get; set; }
+    public string? CreatedById { get; set; }
+    public DateTime? LastModifiedAt { get; set; }
+    public string? LastModifiedById { get; set; }
 
 }

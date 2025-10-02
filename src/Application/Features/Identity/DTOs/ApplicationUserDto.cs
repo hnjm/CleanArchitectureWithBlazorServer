@@ -1,4 +1,4 @@
-﻿using CleanArchitecture.Blazor.Application.Features.Tenants.DTOs;
+using CleanArchitecture.Blazor.Application.Features.Tenants.DTOs;
 using CleanArchitecture.Blazor.Domain.Identity;
 
 namespace CleanArchitecture.Blazor.Application.Features.Identity.DTOs;
@@ -50,14 +50,12 @@ public class ApplicationUserDto
     : TimeZoneInfo.FindSystemTimeZoneById(TimeZoneId).BaseUtcOffset;
     [Description("Language")]
     public string? LanguageCode { get; set; }
-    [Description("Last Modified")]
-    public DateTime? LastModified { get; set; }
-    [Description("Last Modified By")]
-    public string? LastModifiedBy { get; set; }
-    [Description("Created")]
-    public DateTime? Created { get; set; }
-    [Description("Created By")]
-    public string? CreatedBy { get; set; }
+    [Description("Last Modified DateTime")]
+    public DateTime? LastModifiedAt { get; set; }
+
+    [Description("Created DateTime")]
+    public DateTime? CreatedAt { get; set; }
+  
  
     public UserProfile ToUserProfile()
     {

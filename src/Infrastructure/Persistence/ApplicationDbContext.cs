@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Reflection;
@@ -36,7 +36,7 @@ public class ApplicationDbContext : IdentityDbContext<
         
         base.OnModelCreating(builder);
         builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
-        builder.ApplyGlobalFilters<ISoftDelete>(s => s.Deleted == null);
+        builder.ApplyGlobalFilters<ISoftDelete>(s => s.DeletedAt == null);
     }
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {

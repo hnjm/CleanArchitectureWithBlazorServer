@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 namespace CleanArchitecture.Blazor.Application.Features.PicklistSets.EventHandlers;
@@ -19,9 +19,9 @@ public class PicklistSetChangedEventHandler : INotificationHandler<UpdatedEvent<
 
     public async Task Handle(UpdatedEvent<PicklistSet> notification, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Handled domain event '{EventType}' with notification: {@Notification} ",
+        _logger.LogInformation("Handled domain event '{EventType}' for PicklistSet ID: {PicklistSetId}",
              notification.GetType().Name,
-             notification);
+             notification.Entity?.Id);
         await _picklistService.RefreshAsync();
    
     }

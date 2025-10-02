@@ -139,6 +139,9 @@
   <data name="Color" xml:space="preserve">
     <value>Color</value>
   </data>
+  <data name="Primary Color" xml:space="preserve">
+    <value>Primary Color</value>
+  </data>
   <data name="Border Radius" xml:space="preserve">
     <value>Border Radius</value>
   </data>

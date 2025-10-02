@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using CleanArchitecture.Blazor.Application.Features.Documents.Caching;
@@ -53,9 +53,9 @@ public class AddEditDocumentCommandHandler : IRequestHandler<AddEditDocumentComm
         Document document;
         if (request.Id > 0)
         {
-            document = await db.Documents.FindAsync(request.Id, cancellationToken);
-            if (document == null) return await Result<int>.FailureAsync(_localizer["Document Not Found!"]);
-            document = _mapper.Map(request, document);
+            var existingDocument = await db.Documents.FindAsync(request.Id, cancellationToken);
+            if (existingDocument == null) return await Result<int>.FailureAsync(_localizer["Document Not Found!"]);
+            document = _mapper.Map(request, existingDocument);
         }
         else
         {

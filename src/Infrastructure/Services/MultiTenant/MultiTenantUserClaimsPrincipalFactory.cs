@@ -1,8 +1,8 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 #nullable disable warnings
 using CleanArchitecture.Blazor.Domain.Identity;
-using CleanArchitecture.Blazor.Application.Common.Constants.ClaimTypes;
+using CleanArchitecture.Blazor.Application.Common.Constants;
 
 namespace CleanArchitecture.Blazor.Infrastructure.Services.MultiTenant;
 /// <summary>

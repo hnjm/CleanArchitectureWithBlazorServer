@@ -1,15 +1,15 @@
-﻿@using CleanArchitecture.Blazor.Application.Features.Identity.DTOs
+@using CleanArchitecture.Blazor.Application.Features.Identity.DTOs
 @inherits MudComponentBase
 
-@inject IStringLocalizer<Users> L
+@inject IStringLocalizer<Identity.Users.Users> L
 
 <MudDialog>
     <DialogContent>
         <UserForm UserProfile="@UserProfile" @ref="@_userForm" Model="Model" OnFormSubmit="OnFormSubmitHandler"></UserForm>
     </DialogContent>
     <DialogActions>
-        <MudButton OnClick="Cancel">@ConstantString.Cancel</MudButton>
-        <MudButton Color="Color.Primary" OnClick="Submit">@ConstantString.Ok</MudButton>
+        <MudButton OnClick="Cancel">@AppStrings.Cancel</MudButton>
+        <MudButton Color="Color.Primary" OnClick="Submit">@AppStrings.Ok</MudButton>
     </DialogActions>
 </MudDialog>
 
