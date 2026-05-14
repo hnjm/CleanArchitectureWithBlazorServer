@@ -1,24 +1,24 @@
-﻿namespace CleanArchitecture.Blazor.Application.Common.ExceptionHandlers;
+﻿
+namespace CleanArchitecture.Blazor.Application.Common.ExceptionHandlers;
 
-public class
-    ValidationExceptionHandler<TRequest, TResponse, TException> : IRequestExceptionHandler<TRequest, TResponse,
-    TException>
-    where TRequest : IRequest<Result<int>>
-    where TResponse : Result<int>
+public sealed class
+    ValidationExceptionHandler<TRequest, TResponse, TException>
+    where TRequest : IRequest<TResponse>
+    where TResponse : IResult
     where TException : ValidationException
 {
-    private readonly ILogger<ValidationExceptionHandler<TRequest, TResponse, TException>> _logger;
 
-    public ValidationExceptionHandler(ILogger<ValidationExceptionHandler<TRequest, TResponse, TException>> logger)
-    {
-        _logger = logger;
-    }
-
-    public Task Handle(TRequest request, TException exception, RequestExceptionHandlerState<TResponse> state,
+    public ValueTask Handle(TRequest request, TException exception, RequestExceptionHandlerState<TResponse> state,
         CancellationToken cancellationToken)
     {
-        state.SetHandled(
-            (TResponse)Result<int>.Failure(exception.Errors.Select(x => x.ErrorMessage).Distinct().ToArray()));
-        return Task.CompletedTask;
+        var errors = exception.Errors.Select(x => x.ErrorMessage).Distinct().ToArray();
+        var failureResult = CreateFailureResult(errors);
+        state.SetHandled(failureResult);
+        return ValueTask.CompletedTask;
+    }
+
+    private TResponse CreateFailureResult(string[] errors)
+    {
+        return ResultFailureFactory.Create<TResponse>(errors);
     }
 }

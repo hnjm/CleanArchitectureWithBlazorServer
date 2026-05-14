@@ -4,7 +4,7 @@
 
 namespace CleanArchitecture.Blazor.Application.Features.Products.EventHandlers;
 
-public class ProductUpdatedEventHandler : INotificationHandler<UpdatedEvent<Product>>
+public class ProductUpdatedEventHandler : INotificationHandler<ProductUpdatedEvent>
 {
     private readonly ILogger<ProductUpdatedEventHandler> _logger;
 
@@ -15,10 +15,11 @@ public class ProductUpdatedEventHandler : INotificationHandler<UpdatedEvent<Prod
         _logger = logger;
     }
 
-    public Task Handle(UpdatedEvent<Product> notification, CancellationToken cancellationToken)
+    public ValueTask Handle(ProductUpdatedEvent notification, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Handled domain event '{EventType}' with notification: {@Notification} ", notification.GetType().Name, notification);
+        _logger.LogInformation("Handled domain event '{EventType}' for Product ID: {ProductId}", 
+            notification.GetType().Name, notification.Item.Id);
 
-        return Task.CompletedTask;
+        return ValueTask.CompletedTask;
     }
 }
