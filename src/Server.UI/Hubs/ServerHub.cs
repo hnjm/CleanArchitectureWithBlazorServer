@@ -52,7 +52,7 @@ public class ServerHub : Hub<ISignalRHub>
                 await Clients.All.Disconnect(connectionId, connectionUser.UserName).ConfigureAwait(false);
             }    
         }
-        await base.OnConnectedAsync().ConfigureAwait(false);
+        await base.OnDisconnectedAsync(exception).ConfigureAwait(false);
     }
 
     public async Task SendMessage(string message)
