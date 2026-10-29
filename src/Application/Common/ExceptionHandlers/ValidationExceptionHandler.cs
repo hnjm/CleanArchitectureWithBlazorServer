@@ -2,19 +2,17 @@
 namespace CleanArchitecture.Blazor.Application.Common.ExceptionHandlers;
 
 public sealed class
-    ValidationExceptionHandler<TRequest, TResponse, TException>
+    ValidationExceptionHandler<TRequest, TResponse> : MessageExceptionHandler<TRequest, TResponse, ValidationException>
     where TRequest : IRequest<TResponse>
     where TResponse : IResult
-    where TException : ValidationException
 {
 
-    public ValueTask Handle(TRequest request, TException exception, RequestExceptionHandlerState<TResponse> state,
+    protected override ValueTask<ExceptionHandlingResult<TResponse>> Handle(TRequest request, ValidationException exception,
         CancellationToken cancellationToken)
     {
         var errors = exception.Errors.Select(x => x.ErrorMessage).Distinct().ToArray();
         var failureResult = CreateFailureResult(errors);
-        state.SetHandled(failureResult);
-        return ValueTask.CompletedTask;
+        return Handled(failureResult);
     }
 
     private TResponse CreateFailureResult(string[] errors)

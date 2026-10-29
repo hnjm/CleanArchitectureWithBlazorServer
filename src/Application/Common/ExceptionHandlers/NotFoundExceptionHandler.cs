@@ -4,18 +4,17 @@
 /// Handles NotFoundException and converts them into Result or Result&lt;T&gt; responses.
 /// Provides user-friendly error messages for entity not found scenarios.
 /// </summary>
-public sealed class NotFoundExceptionHandler<TRequest, TResponse, TException>
+public sealed class NotFoundExceptionHandler<TRequest, TResponse> : MessageExceptionHandler<TRequest, TResponse, NotFoundException>
     where TRequest : IRequest<TResponse>
     where TResponse : IResult
-    where TException : NotFoundException
 {
-    private readonly ILogger<NotFoundExceptionHandler<TRequest, TResponse, TException>> _logger;
+    private readonly ILogger<NotFoundExceptionHandler<TRequest, TResponse>> _logger;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="NotFoundExceptionHandler{TRequest, TResponse, TException}"/> class.
+    /// Initializes a new instance of the <see cref="NotFoundExceptionHandler{TRequest, TResponse}"/> class.
     /// </summary>
     /// <param name="logger">The logger instance.</param>
-    public NotFoundExceptionHandler(ILogger<NotFoundExceptionHandler<TRequest, TResponse, TException>> logger)
+    public NotFoundExceptionHandler(ILogger<NotFoundExceptionHandler<TRequest, TResponse>> logger)
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
@@ -25,23 +24,19 @@ public sealed class NotFoundExceptionHandler<TRequest, TResponse, TException>
     /// </summary>
     /// <param name="request">The request that caused the exception.</param>
     /// <param name="exception">The NotFoundException to handle.</param>
-    /// <param name="state">The request exception handler state.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
-    public ValueTask Handle(TRequest request, TException exception, RequestExceptionHandlerState<TResponse> state,
+    protected override ValueTask<ExceptionHandlingResult<TResponse>> Handle(TRequest request, NotFoundException exception,
         CancellationToken cancellationToken)
     {
-         
-            var failureResult = CreateFailureResult(exception.Message);
-            state.SetHandled(failureResult);
-            
-            _logger.LogError(exception, 
-                "NotFoundException occurred for request {RequestType}: {ErrorMessage}", 
-                typeof(TRequest).Name, 
-                exception.Message);
-        
-        
-        return ValueTask.CompletedTask;
+        var failureResult = CreateFailureResult(exception.Message);
+
+        _logger.LogError(exception,
+            "NotFoundException occurred for request {RequestType}: {ErrorMessage}",
+            typeof(TRequest).Name,
+            exception.Message);
+
+        return Handled(failureResult);
     }
 
     /// <summary>

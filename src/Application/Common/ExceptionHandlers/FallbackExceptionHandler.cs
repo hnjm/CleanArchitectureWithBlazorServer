@@ -1,17 +1,16 @@
 ﻿namespace CleanArchitecture.Blazor.Application.Common.ExceptionHandlers;
 
-public sealed class FallbackExceptionHandler<TRequest, TResponse, TException>
+public sealed class FallbackExceptionHandler<TRequest, TResponse> : MessageExceptionHandler<TRequest, TResponse>
     where TRequest : IRequest<TResponse>
     where TResponse : IResult
-    where TException : Exception
 {
-    private readonly ILogger<FallbackExceptionHandler<TRequest, TResponse, TException>> _logger;
+    private readonly ILogger<FallbackExceptionHandler<TRequest, TResponse>> _logger;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="GlobalExceptionHandler{TRequest, TResponse, TException}"/> class.
+    /// Initializes a new instance of the <see cref="FallbackExceptionHandler{TRequest, TResponse}"/> class.
     /// </summary>
     /// <param name="logger">The logger.</param>
-    public FallbackExceptionHandler(ILogger<FallbackExceptionHandler<TRequest, TResponse, TException>> logger)
+    public FallbackExceptionHandler(ILogger<FallbackExceptionHandler<TRequest, TResponse>> logger)
     {
         _logger = logger;
     }
@@ -21,10 +20,9 @@ public sealed class FallbackExceptionHandler<TRequest, TResponse, TException>
     /// </summary>
     /// <param name="request">The request.</param>
     /// <param name="exception">The exception.</param>
-    /// <param name="state">The request exception handler state.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
-    public ValueTask Handle(TRequest request, TException exception, RequestExceptionHandlerState<TResponse> state,
+    protected override ValueTask<ExceptionHandlingResult<TResponse>> Handle(TRequest request, Exception exception,
         CancellationToken cancellationToken)
     {
         TResponse failureResult;
@@ -54,8 +52,6 @@ public sealed class FallbackExceptionHandler<TRequest, TResponse, TException>
 
         failureResult = ResultFailureFactory.Create<TResponse>(errorMessages);
 
-        // Set the handled response
-        state.SetHandled(failureResult!);
-        return ValueTask.CompletedTask;
+        return Handled(failureResult);
     }
 }

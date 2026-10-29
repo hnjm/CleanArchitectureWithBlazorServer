@@ -181,8 +181,8 @@ public static class SerilogExtensions
             LogEventLevel.Information,
             needAutoCreateTable: false,
             schemaName: "public",
-            useCopy: false,
-            failureCallback: e => Console.WriteLine($"Sink error: {e.Message}")
+            useCopy: false
+            
         ));
     }
 

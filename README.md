@@ -1,10 +1,8 @@
-# Clean Architecture Blazor Server application template
+﻿# Clean Architecture Blazor Server Application Template
 
-[![Build](https://github.com/neozhu/CleanArchitectureWithBlazorServer/actions/workflows/dotnet.yml/badge.svg)](https://github.com/neozhu/CleanArchitectureWithBlazorServer/actions/workflows/dotnet.yml)
-[![CodeQL](https://github.com/neozhu/CleanArchitectureWithBlazorServer/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/neozhu/CleanArchitectureWithBlazorServer/actions/workflows/codeql-analysis.yml)
-[![Nuget](https://img.shields.io/nuget/v/CleanArchitecture.Blazor.Solution.Template?label=NuGet)](https://www.nuget.org/packages/CleanArchitecture.Blazor.Solution.Template)
-[![Docker Image CI](https://github.com/neozhu/CleanArchitectureWithBlazorServer/actions/workflows/docker-image.yml/badge.svg)](https://github.com/neozhu/CleanArchitectureWithBlazorServer/actions/workflows/docker-image.yml)
-[![Downloads](https://img.shields.io/nuget/dt/CleanArchitecture.Blazor.Solution.Template?label=Downloads)](https://www.nuget.org/packages/CleanArchitecture.Blazor.Solution.Template)
+[![Build](https://github.com/neozhu/CleanBlazorServerPro/actions/workflows/dotnet.yml/badge.svg)](https://github.com/neozhu/CleanBlazorServerPro/actions/workflows/dotnet.yml)
+[![CodeQL](https://github.com/neozhu/CleanBlazorServerPro/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/neozhu/CleanBlazorServerPro/actions/workflows/codeql-analysis.yml)
+[![Docker Image CI](https://github.com/neozhu/CleanBlazorServerPro/actions/workflows/docker-image.yml/badge.svg)](https://github.com/neozhu/CleanBlazorServerPro/actions/workflows/docker-image.yml)
 
 
 > A production-ready Blazor Server application template built on Clean Architecture principles, offering advanced code generation, AI-assisted development workflows, and enterprise-grade capabilities for building scalable and maintainable systems.
@@ -16,9 +14,9 @@ This repository provides a **production-grade Blazor Server solution template** 
 
 Built on **.NET 10**, the template demonstrates a **well-structured, scalable, and maintainable architecture** for developing complex business systems. It integrates **advanced code generation capabilities**, **AI-assisted development workflows**, and **specification-driven design patterns**, enabling teams to accelerate development while preserving architectural consistency and code quality.
 
-This project has officially said goodbye to **MediatR** and **AutoMapper**, replacing them with **Mediator** and **Mapster** for a simpler and more modern architecture.
-
 The solution is intended to serve both as a **reference implementation** for Blazor Clean Architecture best practices and as a **ready-to-use foundation** for enterprise-level applications that require long-term maintainability, extensibility, and high development efficiency.
+
+
 
 
 ### Key Features
@@ -30,7 +28,6 @@ The solution is intended to serve both as a **reference implementation** for Bla
 - **🌐 Multi-tenancy**: Built-in tenant isolation and management
 - **📊 Advanced Data Grid**: Sorting, filtering, pagination, and export capabilities
 - **🎨 Code Generation**: Visual Studio extension for rapid development
-- **🔄 Modern Application Pipeline**: `Mediator` and `Mapster` replace the previous `MediatR` and `AutoMapper` stack
 - **🐳 Docker Ready**: Complete containerization support
 - **📱 Progressive Web App**: PWA capabilities for mobile experience
 
@@ -38,54 +35,62 @@ The solution is intended to serve both as a **reference implementation** for Bla
 
 Experience the application in action:
 
-[![Application Demo](doc/blazorstudio.png)](https://www.youtube.com/watch?v=hCsHSNAs-70)
+[![Blazor Studio application demo](doc/blazor-studio-showcase.png)](https://www.youtube.com/watch?v=hCsHSNAs-70)
 
 **Live Demo**: [architecture.blazorserver.com](https://architecture.blazorserver.com/)
 
 ### Featured Projects Built with This Template
 
-[![HR Cloud](doc/hrcloud.png)](https://hrcloud.blazorserver.com/)
-**HR Cloud** - [GitHub](https://github.com/neozhu/hrhub) | [Live Demo](https://hrcloud.blazorserver.com/)
-> Enabling collaboration between employers, suppliers, and HR management with integrated attendance, work hours, and billing in a seamless online closed loop.
+[![Fabric Quotation](doc/fabric-quotation-showcase.png)](https://fabric-quotation.blazorserver.com/)
 
-[![BLAZOR PARKING SYSTEM](doc/aceparking.png)](https://blazorparking.blazorserver.com/)
-**BLAZOR PARKING SYSTEM** - [GitHub](https://github.com/neozhu/aceparking) | [Live Demo](https://blazorparking.blazorserver.com/)
+**Fabric Quotation** is a modern textile quotation management platform for coordinating product structures, price books, business partners, quotation workflows, and approvals in one place. Built with this Clean Architecture Blazor Server template, it demonstrates how the foundation can support a polished, data-rich business application.
 
-[![HSE Management System](doc/094346.png)](https://hse.blazorserver.com/)
-**HSE Management System** - [GitHub](https://github.com/neozhu/workflow) | [Live Demo](https://hse.blazorserver.com/)
+**[Explore the Live Demo](https://fabric-quotation.blazorserver.com/)**
 
-[![Digital Product Passport](doc/094553.png)](https://materialpassport.blazorserver.com/)
-**EU Digital Product Passport** - [Live Demo](https://materialpassport.blazorserver.com/)
+[![HSE Management System](doc/hse-management-showcase.png)](https://hse.blazorserver.com/)
 
-[![Delivery Print](doc/deliver-print.png)](https://delivery-note.blazorserver.com/)
-**Delivery Print** - [GitHub](https://github.com/neozhu/delivery-print) | [Live Demo](https://delivery-note.blazorserver.com/)
+**HSE Management System** is a workflow-driven operations platform for managing permits to work, visitor and gate-pass requests, access control, and task approvals.
+
+**[GitHub](https://github.com/neozhu/workflow)** | **[Explore the Live Demo](https://hse.blazorserver.com/)**
+
+[![Digital Product Passport](doc/digital-product-passport-showcase.png)](https://materialpassport.blazorserver.com/)
+
+**EU Digital Product Passport** helps teams structure product material data, manage passport content, and prepare traceable digital product records through a clear, guided workflow.
+
+**[Explore the Live Demo](https://materialpassport.blazorserver.com/)**
+
+[![HR Cloud](doc/hrhub-marketing.png)](https://hrcloud.blazorserver.com/)
+
+**HR Cloud (HRHub)** is a labor outsourcing HR service platform connecting employers, suppliers, and HR teams. It integrates employee management, device-based attendance tracking, shift-based work hours, and automated monthly billing in one workflow.
+
+**[GitHub](https://github.com/neozhu/hrhub)** | **[Explore the Live Demo](https://hrcloud.blazorserver.com/)**
+
+[![Visitor Training](doc/visitorTraining.png)](https://visitor-training-client.blazorserver.com/)
+
+**Visitor Training** provides a visitor-facing training client and a management portal.
+
+**[Training Client](https://visitor-training-client.blazorserver.com/)** | **[Management Portal](https://visitor-training.blazorserver.com/)**
 
 ## 🛠️ Technology Stack
 
 | Layer | Technologies |
 |-------|-------------|
 | **Frontend** | Blazor Server, MudBlazor, SignalR |
-| **Backend** | .NET 10, ASP.NET Core, Mediator, Mapster, FluentValidation |
+| **Backend** | .NET 10, ASP.NET Core, MediatR, FluentValidation |
 | **Database** | Entity Framework Core, MSSQL/PostgreSQL/SQLite |
 | **Authentication** | ASP.NET Core Identity, OAuth 2.0, JWT |
 | **Caching** | FusionCache, Redis |
-| **Background Jobs** | Hangfire |
+| **Background Processing** | Hosted services, in-memory queues |
 | **Testing** | xUnit, FluentAssertions, Moq |
 | **DevOps** | Docker, GitHub Actions |
 
 ## 🏗️ Architecture Overview
 
-```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Server.UI     │    │  Application    │    │     Domain      │
-│   (Blazor)      │───▶│   (Business)    │───▶│   (Entities)    │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-         │                        │                        
-         │              ┌─────────────────┐               
-         └─────────────▶│ Infrastructure  │               
-                        │   (Data/IO)     │               
-                        └─────────────────┘               
-```
+The diagram shows runtime calls and domain model usage. Application calls Infrastructure implementations through Application-owned interfaces; these arrows do not represent compile-time project references.
+
+![CleanBlazorServerPro architecture: Blazor UI, Application use cases, Domain models, and Infrastructure adapters](doc/architecture.svg)
+
+[Download the interactive Archify diagram](doc/architecture.html) and open it locally to inspect source references, switch themes, and export images. 
 
 ### Layer Responsibilities
 
@@ -94,46 +99,113 @@ Experience the application in action:
 - **Infrastructure**: External concerns (database, email, file system)
 - **Server.UI**: Blazor components and user interface
 
-## 🕸️ Codebase Knowledge Graph with Graphify
+## 🧩 Dynamic Fields Architecture
 
-This repository includes generated Graphify outputs under `graphify-out/` to help navigate the codebase as a persistent knowledge graph.
+The dynamic-fields subsystem adds template-driven attributes to selected business entities without adding entity-specific columns for every custom field. `Product` is the reference implementation, and the same building blocks can be reused by future entities such as `Contract` or `Asset`.
 
-Use the graph when you want to answer architecture questions, inspect coupling, trace relationships between files, or find the most connected abstractions before changing code.
+### Model
 
-### Generated Graphs
+```text
+FieldGroupTemplate
+└── FieldSection
+    └── FieldSectionItem ──> FieldDefinition
+                               (type, label, limits, regex, unit, picklist)
 
-The main graph files are:
-
-- `graphify-out/graph.html` - interactive browser graph
-- `graphify-out/GRAPH_REPORT.md` - architecture-oriented report with god nodes, communities, and surprising connections
-- `graphify-out/graph.json` - raw graph data for GraphRAG-style queries
-
-Scoped graph archives are also kept for the major areas of the solution:
-
-- `graphify-out/domain/`
-- `graphify-out/application-common/`
-- `graphify-out/application-features/`
-- `graphify-out/application-pipeline/`
-- `graphify-out/infrastructure/`
-- `graphify-out/server-ui/`
-
-The `Server.UI` graph excludes resource files under `src/Server.UI/Resources` and runtime logs so the graph stays focused on source, components, pages, services, layouts, and configuration.
-
-### Useful Commands
-
-```bash
-graphify query "how does authentication work" --budget 2000
-graphify query "what are the most coupled abstractions" --budget 2000
-graphify query "how does caching flow through the app" --budget 2000
-graphify path "Server.UI" "ApplicationDbContext"
-graphify explain "UserProfileState"
+ExtensibleEntity
+└── FieldGroupInstance ──> FieldGroupTemplate
+    └── FieldValue ──────> FieldDefinition
 ```
 
-### Maintenance Notes
+The model separates field metadata from record values:
 
-- Keep the canonical generated output in the repository-level `graphify-out/` folder.
-- Do not keep generated graph folders inside `src/**`; `.gitignore` excludes `src/**/graphify-out/` to avoid polluting searches, builds, and future graph indexing.
-- After meaningful architecture changes, refresh the relevant graph with `graphify update .` or rerun Graphify for the affected subfolder.
+- `FieldDefinition` describes a reusable field and its validation metadata.
+- `FieldGroupTemplate` organizes definitions into ordered sections and determines which fields apply to a business record.
+- `FieldGroupInstance` binds one extensible business record to one template.
+- `FieldValue` stores one normalized string value for one definition.
+- `ExtensibleEntity` exposes the optional `DynamicFields` navigation used by supported business entities.
+
+`ExtensibleEntity` uses EF Core table-per-type (TPT) mapping. `FieldGroupInstance.Id` is both its primary key and a foreign key to `ExtensibleEntity.Id`, which enforces at most one dynamic-field instance per business record while preserving normal EF navigation properties and referential integrity.
+
+```csharp
+public abstract class ExtensibleEntity : BaseAuditableEntity
+{
+    public FieldGroupInstance? DynamicFields { get; set; }
+}
+
+public class Product : ExtensibleEntity
+{
+    // Product fields...
+}
+```
+
+### Layer Responsibilities and Data Flow
+
+1. The business module selects a trusted template code, such as `ProductDynamicFields.DefaultTemplateCode`.
+2. Application loads the complete template, including sections, items, and definitions.
+3. `DynamicFieldsEditor` renders the template and delegates each typed control to `DynamicFieldInput`.
+4. The command submits `FieldValueDto` values identified by `FieldDefinitionId`; submitted definition metadata and row IDs are not authoritative.
+5. `FieldGroupInstanceSynchronizer` validates the complete value set against the database-loaded template, normalizes values, and updates the owner's entity graph.
+6. The command handler saves fixed fields and dynamic fields in one `SaveChangesAsync` operation.
+
+The reusable synchronizer does not select templates, query the database, start transactions, or save changes. Those responsibilities remain in the business command handler. It validates required fields, length and regex rules, numeric ranges, dates, Booleans, and single/multiple picklists before mutating the graph.
+
+Supported values are stored in culture-independent formats:
+
+| Field type | Stored representation |
+|------------|-----------------------|
+| String | Trimmed string or `null` |
+| Integer | Invariant integer string |
+| Number | Invariant decimal string |
+| DateOnly | `yyyy-MM-dd` |
+| DateTime | `yyyy-MM-dd HH:mm:ss` |
+| Boolean | `true` or `false` |
+| Single picklist | Selected option |
+| Multiple picklist | JSON string array |
+
+### Extending Another Entity
+
+Use the following steps to add dynamic fields to another business entity. Keep template selection inside that entity's Application feature; do not add entity-specific foreign keys or type switches to `FieldGroupInstance`.
+
+1. Inherit from `ExtensibleEntity`:
+
+   ```csharp
+   public class Contract : ExtensibleEntity
+   {
+       public string ContractNumber { get; set; } = null!;
+       public DateOnly EffectiveDate { get; set; }
+   }
+   ```
+
+2. Keep the entity's normal EF configuration and add a migration. The existing TPT and shared-primary-key configurations provide the dynamic-fields relationship.
+
+3. Define the module-owned template policy:
+
+   ```csharp
+   public static class ContractDynamicFields
+   {
+       public const string DefaultTemplateCode = "contract-attributes";
+   }
+   ```
+
+4. Create or seed the corresponding `FieldGroupTemplate`, sections, items, and definitions through the existing management module.
+
+5. In create/update handlers, load the authoritative template and the owner's current dynamic values, then call the shared synchronizer before the handler's single save:
+
+   ```csharp
+   var result = new FieldGroupInstanceSynchronizer()
+       .Synchronize(contract, template, request.DynamicFieldValues);
+
+   if (!result.Succeeded)
+       return await Result<int>.FailureAsync(result.ErrorMessage);
+
+   await context.SaveChangesAsync(cancellationToken);
+   ```
+
+6. Reuse `GetFieldGroupTemplateByCodeQuery`, `FieldValueDto`, `DynamicFieldsEditor`, and `DynamicFieldInput` in the entity form. The reusable components contain no Product-specific template code.
+
+7. Add tests for create, update, required/invalid values, foreign or duplicate definition IDs, template mismatch, and atomic persistence.
+
+For the complete design decisions and Product example, see [Extensible Entity Dynamic Fields Design](docs/superpowers/specs/2026-08-22-extensible-entity-dynamic-fields-design.md) and [Product Dynamic Fields Editor Design](docs/superpowers/specs/2026-08-23-product-dynamic-fields-editor-design.md).
 
  
 ### 📋 Development Workflow
@@ -168,7 +240,7 @@ The project includes a comprehensive [Development Workflow](docs/) with:
 
 3. **Setup Database**
    ```bash
-   dotnet ef migrations add InitialCreate --project src/Migrators/Migrators.MSSQL --startup-project src/Server.UI --context ApplicationDbContext
+   dotnet ef database update --project src/Migrators/Migrators.MSSQL
    ```
 
 4. **Run the Application**
@@ -204,28 +276,6 @@ See [Docker Setup Documentation](#docker-setup-for-blazor-server-application) fo
 - **[API Documentation](docs/)**: Complete API reference
 - **[Deployment Guide](docs/)**: Production deployment instructions
 - **[Contributing Guidelines](CONTRIBUTING.md)**: How to contribute to the project
-
-## 📐 Using Superpowers for Design and Planning
-
-This repository recommends using the content under `docs/superpowers/` for design notes, implementation plans, and workflow guidance when a change needs more than a quick edit.
-
-### Recommended Workflow
-
-1. Explore the existing implementation first.
-   Review similar features in `src/Application/Features`, related UI pages in `src/Server.UI`, and the current setup instructions in `README.md`.
-2. Write down design or planning notes when the task is non-trivial.
-   Store them under `docs/superpowers/specs/` or `docs/superpowers/plans/`.
-3. Implement by following existing repository patterns.
-   Reuse the Contacts-style module structure, current pipeline behaviors, validation approach, and navigation conventions where applicable.
-4. Verify the change before finishing.
-   Run the relevant build and test commands, then update documentation if setup or workflow steps changed.
-
-### Tips
-
-- Use existing modules as the reference implementation for structure and conventions.
-- Add menu entries in `src/Server.UI/Services/Navigation/MenuService.cs`.
-- Define permissions under `Permissions.<Module>` so they are included during seeding.
-- For data access in handlers, prefer the current per-operation context lifetime patterns already used in the repository.
 
 ## 🔧 Code Generation
 
@@ -350,6 +400,21 @@ volumes:
   mssql_data:
 ```
 
+### SQL Server Database Migrations
+
+Install the EF Core CLI version that matches the project:
+
+```bash
+dotnet tool install --global dotnet-ef --version 10.0.11
+```
+
+Create a migration and apply it to the configured SQL Server database:
+
+```bash
+dotnet ef migrations add <MigrationName> --project src/Migrators/Migrators.MSSQL/Migrators.MSSQL.csproj --startup-project src/Server.UI/Server.UI.csproj --context ApplicationDbContext --output-dir Migrations
+dotnet ef database update --project src/Migrators/Migrators.MSSQL/Migrators.MSSQL.csproj --startup-project src/Server.UI/Server.UI.csproj --context ApplicationDbContext
+```
+
 ## 🤝 Contributing
 
 We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details.
@@ -363,9 +428,6 @@ We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.
 ## 📖 Learning Resources
 
 ### Video Tutorials
-
-[![Passkey Authentication Implementation for .NET 10 Blazor Server](https://img.youtube.com/vi/hcsV2VDagzA/maxresdefault.jpg)](https://youtu.be/hcsV2VDagzA?si=MRZ13N62DTVwjyqk)
-**Passkey Authentication Implementation for .NET 10 Blazor Server**
 
 [![Adding Contact Entity](doc/create.png)](https://www.youtube.com/watch?v=X1b4hFLs4vo)
 **Tutorial: Adding a Contact Entity**

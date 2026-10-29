@@ -1,4 +1,4 @@
-namespace CleanArchitecture.Blazor.Application.Pipeline;
+﻿namespace CleanArchitecture.Blazor.Application.Pipeline;
 
 public sealed class ValidationBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
     where TRequest : class, IMessage
@@ -21,7 +21,7 @@ public sealed class ValidationBehavior<TRequest, TResponse> : IPipelineBehavior<
             var failures = await _validators.ValidateAsync(request, cancellationToken).ConfigureAwait(false);
 
             if (failures.Any())
-                throw new ValidationException(string.Join(", ", failures.Select(x => x.ErrorMessage)));
+                throw new ValidationException(failures);
         }
 
         return await next(request, cancellationToken).ConfigureAwait(false);

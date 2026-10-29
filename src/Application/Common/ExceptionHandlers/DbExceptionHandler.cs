@@ -6,24 +6,20 @@ namespace CleanArchitecture.Blazor.Application.Common.ExceptionHandlers;
 /// Handles database update exceptions and converts them into Result or Result&lt;T&gt; responses.
 /// Provides user-friendly error messages for various database constraint violations.
 /// </summary>
-public sealed class DbExceptionHandler<TRequest, TResponse, TException>
+public sealed class DbExceptionHandler<TRequest, TResponse> : MessageExceptionHandler<TRequest, TResponse, DbUpdateException>
     where TRequest : IRequest<TResponse>
     where TResponse : IResult
-    where TException : DbUpdateException
 {
     // Common constraint-name prefixes to strip
     private static readonly string[] ConstraintPrefixes = ["PK_", "FK_", "IX_", "UQ_", "UC_"];
-    public ValueTask Handle(
+    protected override ValueTask<ExceptionHandlingResult<TResponse>> Handle(
         TRequest request,
-        TException exception,
-        RequestExceptionHandlerState<TResponse> state,
+        DbUpdateException exception,
         CancellationToken cancellationToken)
     {
         var errors = GetUserFriendlyErrors(exception);
         var failureResult = CreateFailureResult(errors);
-
-        state.SetHandled(failureResult);
-        return ValueTask.CompletedTask;
+        return Handled(failureResult);
     }
 
     private TResponse CreateFailureResult(string[] errors)

@@ -22,12 +22,15 @@ public static class DependencyInjection
             options.NotificationPublisherType = typeof(ChannelBasedNoWaitPublisher);
             options.ServiceLifetime = ServiceLifetime.Scoped;
             options.PipelineBehaviors = [
+                 typeof(FallbackExceptionHandler<,>),
+                typeof(ValidationExceptionHandler<,>),
+                typeof(NotFoundExceptionHandler<,>),
+                typeof(DbExceptionHandler<,>),
                 typeof(ValidationBehavior<,>),
-                typeof(ResultExceptionBehavior<,>),
                 typeof(PerformanceBehaviour<,>),
                 typeof(FusionCacheBehaviour<,>),
                 typeof(CacheInvalidationBehaviour<,>)
-                ];
+                 ];
 
         });
        
